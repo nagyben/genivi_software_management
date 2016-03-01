@@ -61,7 +61,7 @@ class PartMgrService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number)
@@ -147,7 +147,7 @@ class PartMgrService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number)
@@ -193,7 +193,7 @@ class PartMgrService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate write
         print "Writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
@@ -240,7 +240,7 @@ class PartMgrService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate patch
         print "Patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)

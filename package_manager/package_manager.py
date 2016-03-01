@@ -53,7 +53,7 @@ class PkgMgrService(rpyc.Service):
             # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
-            send_reply(True)
+            #send_reply(True)
 
             # Simulate install
             print "Intalling package: {} (5 sec)".format(image_path)
@@ -104,7 +104,7 @@ class PkgMgrService(rpyc.Service):
             # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
-            send_reply(True)
+            #send_reply(True)
 
             # Simulate install
             print "Upgrading package: {} (5 sec)".format(image_path)
@@ -150,7 +150,7 @@ class PkgMgrService(rpyc.Service):
             # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
-            send_reply(True)
+            #send_reply(True)
 
             # Simulate remove
             print "Upgrading package: {} (5 sec)".format(package_id)
