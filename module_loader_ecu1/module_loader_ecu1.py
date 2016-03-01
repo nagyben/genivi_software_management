@@ -91,6 +91,6 @@ from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(ECU1ModuleLoaderService, port = swm.PORT_ECU1)
 t.start()
 
-while True:
-    #FIXME: gtk.main_interaction()
-    gtk.main_iteration()
+#while True:
+#    #FIXME: gtk.main_interaction()
+#    gtk.main_iteration()

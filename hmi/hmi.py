@@ -259,6 +259,5 @@ from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(LCMgrService, port = swm.PORT_HMI)
 t.start()
 
-while True:
-    #FIXME: gtk_main_interaction()
-    gtk.main_iteration()
+#while True:
+#    gtk.main_iteration()

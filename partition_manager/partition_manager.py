@@ -267,6 +267,6 @@ from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PartMgrService, port = swm.PORT_PARTMGR)
 t.start()
 
-while True:
-    #TODO: gtk.main_interaction()
-    gtk.main_iteration()
+#while True:
+#    #TODO: gtk.main_interaction()
+#    gtk.main_iteration()

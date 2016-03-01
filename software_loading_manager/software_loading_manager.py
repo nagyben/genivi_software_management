@@ -34,8 +34,8 @@ class SLMService(rpyc.Service):
         return initiate_download(self, package_id)
 
     def initiate_download(self, package_id):
-        #TODO: dbus method call
-        swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
+        #swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
+        swm.sc_rpyc.root.initiate_download(package_id)
 
     #
     # Distribute a report of a completed installation
@@ -47,13 +47,13 @@ class SLMService(rpyc.Service):
                                  results):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
-        #TODO: dbus method call
-        swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
+        #swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
+        swm.hmi_rpyc.root.update_report(update_id, results)
 
         # Send installation report to SOTA
         print "Sending report to sota.update_report()"
-        #TODO: dbus method call
-        swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
+        #swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
+        swm.sc_rpyc.root.update_report(update_id, results)
 
     def get_current_manifest(self):
         return self.manifest_processor.current_manifest
@@ -79,9 +79,9 @@ class SLMService(rpyc.Service):
         return True
 
     def inform_hmi_of_new_operation(self,op):
-        #TODO: dbus method call
-        swm.dbus_method("org.genivi.hmi", "operation_started",
-                        op.operation_id, op.time_estimate, op.description)
+        #swm.dbus_method("org.genivi.hmi", "operation_started",
+        #                op.operation_id, op.time_estimate, op.description)
+        swm.hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
         return None
 
     def inform_hmi_of_new_manifest(self,manifest):
@@ -89,9 +89,9 @@ class SLMService(rpyc.Service):
         for op in manifest.operations:
             total_time = total_time + op.time_estimate
 
-        #TODO: dbus method call
-        swm.dbus_method("org.genivi.hmi", "manifest_started",
-                        manifest.update_id, total_time, manifest.description)
+        #swm.dbus_method("org.genivi.hmi", "manifest_started",
+        #                manifest.update_id, total_time, manifest.description)
+        swm.hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
         return None
 
     def start_next_operation(self):
@@ -327,11 +327,6 @@ def usage():
 
 # === Entry point ===
 
-# register service over RPyC
-from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
-t.start()
-
 print
 print "Software Loading Manager."
 print
@@ -364,9 +359,7 @@ if reset_db:
     except:
         pass
 
-
-slm_sota = SLMService(db_path)
-
-while True:
-    #TODO: gtk.main_interaction()
-    gtk.main_iteration()
+# register service over RPyC
+from rpyc.utils.server import ThreadedServer
+t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
+t.start()

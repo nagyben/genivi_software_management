@@ -119,6 +119,6 @@ t = ThreadedServer(LCMgrService, port = swm.PORT_LCMGR)
 t.start()
 
 
-while True:
-    #FIXME: gtk.main_interaction()
-    gtk.main_iteration()
+#while True:
+#    #FIXME: gtk.main_interaction()
+#    gtk.main_iteration()

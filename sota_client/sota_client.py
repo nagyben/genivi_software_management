@@ -226,9 +226,8 @@ try:
     active = True
 
     # Active will be set to false by installation_report()
-    while active:
-        #FIXME: gtk.main_interaction()
-        gtk.main_iteration()
+    #while active:
+    #    gtk.main_iteration()
 
 except Exception as e:
     print "Exception: {}".format(e)
