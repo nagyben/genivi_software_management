@@ -39,7 +39,7 @@ PORT_ECU1       = 90005
 PORT_LCMGR      = 90006
 PORT_HMI        = 90007
 
-swm_rpyc = rpyc.connect("localhost")
+swlm_rpyc = rpyc.connect("localhost", PORT_SWLM)
 
 def result(operation_id, code, text):
     if code < SWM_RES_OK or code >= _SWM_RES_FIRST_UNUSED:
@@ -70,7 +70,10 @@ def send_operation_result(transaction_id, result_code, result_text):
     # Send back operation result.
     # Software Loading Manager will distribute the report to all interested parties.
     #
-    #TODO: dbus method call
-    dbus_method("org.genivi.software_loading_manager", "operation_result",
-                transaction_id, result_code, result_text)
+
+    #dbus_method("org.genivi.software_loading_manager", "operation_result",
+    #            transaction_id, result_code, result_text)
+
+    swlm_rpyc.exposed_operation_result(transaction_id, result_code, result_text)
+    
     return None
