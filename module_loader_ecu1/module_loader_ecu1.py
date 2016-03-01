@@ -87,6 +87,9 @@ print
 
 #DBusGMainLoop(set_as_default=True)
 #module_loader_ecu1 = ECU1ModuleLoaderService()
+from rpyc.utils.server import ThreadedServer
+t = ThreadedServer(ECU1ModuleLoaderService, port = 90005)
+t.start()
 
 while True:
     #FIXME: gtk.main_interaction()
