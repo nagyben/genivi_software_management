@@ -118,8 +118,7 @@ class HMIService(rpyc.Service):
             # so that we can continue with user interaction without
             # risking a DBUS timeout
             #
-            #FIXME: dbus reply
-            send_reply(True)
+            #send_reply(True)
 
             print
             print
@@ -148,8 +147,8 @@ class HMIService(rpyc.Service):
             # Call software_loading_manager.package_confirmation()
             # to inform it of user approval / decline.
             #
-            #FIXME:dbus method call
-            swm.dbus_method('org.genivi.software_loading_manager','update_confirmation', update_id, approved)
+            #swm.dbus_method('org.genivi.software_loading_manager','update_confirmation', update_id, approved)
+            swm.swlm_rpyc.root.update_confirmation(update_id, approved)
 
         except Exception as e:
             print "Exception: {}".format(e)
@@ -174,8 +173,7 @@ class HMIService(rpyc.Service):
                          send_error):
         try:
             print "Manifest started"
-            #FIXME: dbus reply
-            send_reply(True)
+            #send_reply(True)
             print "\033[H\033[J"
             ct = time.time()
             self.progress_thread.set_manifest(description,
@@ -206,8 +204,7 @@ class HMIService(rpyc.Service):
 
         try:
             print "Op started"
-            #FIXME: dbus reply
-            send_reply(True)
+            #send_reply(True)
             ct = time.time()
             self.progress_thread.set_operation(description, ct, ct + float(time_estimate) / 1000.0)
         except Exception as e:
@@ -229,8 +226,7 @@ class HMIService(rpyc.Service):
                       send_reply,
                       send_error):
         try:
-            #FIXME: dbus reply
-            send_reply(True)
+            #send_reply(True)
             self.progress_thread.exit_thread()
             print "Update report"
             print "  ID:          {}".format(update_id)
