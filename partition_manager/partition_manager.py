@@ -6,26 +6,34 @@
 
 
 
-import gtk
-import dbus
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
+#import gtk
+#import dbus
+#import dbus.service
+#from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
 import swm
 
+import rpyc
+
 #
 # Partition manager service
 #
-class PartMgrService(dbus.service.Object):
+class PartMgrService(rpyc.Service):
     def __init__(self):
-        bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
-        dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
+        pass
+        #bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
+        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
 
+    #@dbus.service.method('org.genivi.partition_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
 
-    @dbus.service.method('org.genivi.partition_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def create_disk_partition(self, 
+    def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
+        """ function to expose create_disk_partition over RPyC
+        """
+        return create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
+
+    def create_disk_partition(self,
                               transaction_id,
                               disk,
                               partition_number,
@@ -34,8 +42,8 @@ class PartMgrService(dbus.service.Object):
                               size,
                               guid,
                               name,
-                              send_reply, 
-                              send_error): 
+                              send_reply,
+                              send_error):
 
         print "Partition Manager: create_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -50,7 +58,7 @@ class PartMgrService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -61,25 +69,30 @@ class PartMgrService(dbus.service.Object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.1)
-        print  
+        print
         print "Done"
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Partition create successful. Disk: {}:{}".format(disk, partition_number))
 
         return None
-                 
 
-    @dbus.service.method('org.genivi.partition_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def resize_disk_partition(self, 
+    #@dbus.service.method('org.genivi.partition_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error):
+        """ function to expose resize_disk_partition over RPyC
+        """
+        return resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error)
+
+    def resize_disk_partition(self,
                               transaction_id,
                               disk,
                               partition_number,
                               start,
                               size,
-                              send_reply, 
-                              send_error): 
+                              send_reply,
+                              send_error):
 
         print "Partition Manager: resize_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -91,9 +104,10 @@ class PartMgrService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
+        #TODO: dbus reply
         send_reply(True)
 
         # Simulate install
@@ -102,21 +116,26 @@ class PartMgrService(dbus.service.Object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
-        print  
+        print
         print "Done"
         swm.send_operation_result(transaction_id,
                                    swm.SWM_RES_OK,
                                    "Partition resize success. Disk: {}:{}".format(disk, partition_number))
         return None
 
+    #@dbus.service.method('org.genivi.partition_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
 
-    @dbus.service.method('org.genivi.partition_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def delete_disk_partition(self, 
+    def exposed_delete_disk_partition(self, transaction_id, disk, send_reply, send_error):
+        """ function to expose delete_disk_partition over rpyc
+        """
+        return delete_disk_partition(self, transaction_id, disk, send_reply, send_error)
+
+    def delete_disk_partition(self,
                               transaction_id,
                               disk,
-                              send_reply, 
-                              send_error): 
+                              send_reply,
+                              send_error):
 
         print "Partition Manager: delete_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -126,7 +145,7 @@ class PartMgrService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -137,7 +156,7 @@ class PartMgrService(dbus.service.Object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
-        print  
+        print
         print "Done"
         swm.send_operation_result(transaction_id,
                                    swm.SWM_RES_OK,
@@ -145,17 +164,22 @@ class PartMgrService(dbus.service.Object):
 
         return None
 
+    #@dbus.service.method('org.genivi.partition_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
 
-    @dbus.service.method('org.genivi.partition_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def write_disk_partition(self, 
+    def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+        """ function to expose write_disk_partition over rpyc
+        """
+        return write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+
+    def write_disk_partition(self,
                              transaction_id,
                              disk,
                              partition_number,
                              image_path,
                              blacklisted_partitions,
-                             send_reply, 
-                             send_error): 
+                             send_reply,
+                             send_error):
 
         print "Partition Manager: write_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -167,7 +191,7 @@ class PartMgrService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -178,7 +202,7 @@ class PartMgrService(dbus.service.Object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
-        print  
+        print
         print "Done"
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
@@ -186,18 +210,23 @@ class PartMgrService(dbus.service.Object):
                                   format(disk, partition_number, image_path))
 
         return None
-                 
 
-    @dbus.service.method('org.genivi.partition_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def patch_disk_partition(self, 
+    #@dbus.service.method('org.genivi.partition_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+        """ function to expose patch_disk_partition over rpyc
+        """
+        return patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+
+    def patch_disk_partition(self,
                              transaction_id,
                              disk,
                              partition_number,
                              image_path,
                              blacklisted_partitions,
-                             send_reply, 
-                             send_error): 
+                             send_reply,
+                             send_error):
 
         print "Partition Manager: patch_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -209,7 +238,7 @@ class PartMgrService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -220,20 +249,21 @@ class PartMgrService(dbus.service.Object):
             sys.stdout.patch('.')
             sys.stdout.flush()
             time.sleep(0.2)
-        print  
+        print
         print "Done"
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Partition patch success. Disk: {}:{} Image: {}".
                                   format(disk, partition_number, image_path))
         return None
-                 
 
-print 
+
+print
 print "Partition Manager."
 print
-DBusGMainLoop(set_as_default=True)
+#DBusGMainLoop(set_as_default=True)
 part_mgr = PartMgrService()
 
 while True:
+    #TODO: gtk.main_interaction()
     gtk.main_iteration()
