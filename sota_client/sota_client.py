@@ -217,16 +217,17 @@ try:
     # ML, PartMgr)
     #
     # Once the update has been processed by SLM, an u@dbus
-    #TODO: dbus method call
-    swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
-                    update_id, description, signature, request_confirmation)
 
+    #swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
+    #                update_id, description, signature, request_confirmation)
+
+    swm.swlm_rpyc.exposed_update_available(update_id, description, signature, request_confirmation)
 
     active = True
 
     # Active will be set to false by installation_report()
     while active:
-        # TODO: what is main_interaction()?
+        #FIXME: gtk.main_interaction()
         gtk.main_iteration()
 
 except Exception as e:
