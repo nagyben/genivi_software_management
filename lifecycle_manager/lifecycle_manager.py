@@ -49,6 +49,7 @@ class LCMgrService(dbus.service.Object):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
+        #FIXME: dbus reply
         send_reply(True)
 
         # Simulate install

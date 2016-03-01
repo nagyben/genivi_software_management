@@ -33,7 +33,7 @@ _SWM_RES_FIRST_UNUSED = 20
 def result(operation_id, code, text):
     if code < SWM_RES_OK or code >= _SWM_RES_FIRST_UNUSED:
         code = SWM_RES_GENERAL_ERROR
-    
+
     return {
         'id': dbus.String(operation_id, variant_level=1),
         'result_code': dbus.Int32(code, variant_level=1),
@@ -53,12 +53,13 @@ def dbus_method(path, method, *arguments):
         traceback.print_exc()
 
     return None
-            
+
 def send_operation_result(transaction_id, result_code, result_text):
     #
     # Send back operation result.
     # Software Loading Manager will distribute the report to all interested parties.
     #
+    #TODO: dbus method call
     dbus_method("org.genivi.software_loading_manager", "operation_result",
                 transaction_id, result_code, result_text)
     return None
