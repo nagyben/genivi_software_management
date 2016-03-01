@@ -53,8 +53,7 @@ class ECU1ModuleLoaderService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        #FIXME: dbus reply
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Intalling on ECU1: {} (5 sec):".format(image_path)
