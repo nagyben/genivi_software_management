@@ -1,0 +1,6 @@
+PORT LIST FOR GENIVI SWM RPYC SERVICES
+sota_client			90001
+software_loading_manager	90002
+partition_manager		90003
+package_manager			90004
+module_loader_ecu1		90005
