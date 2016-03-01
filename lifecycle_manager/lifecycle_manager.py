@@ -19,7 +19,7 @@ import rpyc
 #
 # Lifecycle manager service
 #
-class LCMgrService(dbus.service.Object):
+class LCMgrService(rpyc.Service):
     def __init__(self):
         #bus_name = dbus.service.BusName('org.genivi.lifecycle_manager', dbus.SessionBus())
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/lifecycle_manager')
@@ -49,8 +49,7 @@ class LCMgrService(dbus.service.Object):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        #FIXME: dbus reply
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Starting :"
@@ -89,8 +88,7 @@ class LCMgrService(dbus.service.Object):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        #FIXME: dbus reply
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Stopping :"
@@ -120,5 +118,4 @@ t.start()
 
 
 #while True:
-#    #FIXME: gtk.main_interaction()
 #    gtk.main_iteration()
