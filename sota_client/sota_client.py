@@ -2,7 +2,7 @@
 #
 # Mozilla Public License 2.0
 #
-# Python dbus service that faces SOTA interface 
+# Python dbus service that faces SOTA interface
 # of Software Loading manager.
 
 
@@ -16,13 +16,15 @@ import time
 import swm
 import traceback
 
+import rpyc
+
 # Default command line arguments
 update_id='media_player_1_2_3'
 description='Media Player Update'
 signature='d2889ee6bc1fe1f3d7c5cdaca78384776bf437b7c6ca4db0e2c8b1d22cdb8f4e'
 update_file=''
 active=True
-class SOTAClientService(dbus.service.Object):
+class SOTAClientService(rpyc.Service):
     def __init__(self, image_file, signature):
 
         # Store where we have the image file
@@ -37,15 +39,29 @@ class SOTAClientService(dbus.service.Object):
         # Define our own object on the sota_client bus
         dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
 
+    def on_connect(self):
+        # code runs when connection is created
+        pass
 
+    def on_disconnect(self):
+        # code runs when the connection has closed
+        pass
+
+    def exposed_get_answer(self):
+        # an exposed method
+        return 42
+
+    def get_question(self):
+        # a method which is not exposed
+        return "This is not exposed"
 
     @dbus.service.method('org.genivi.sota_client',
                          async_callbacks=('send_reply', 'send_error'))
 
-    def initiate_download(self, 
+    def initiate_download(self,
                           update_id,
                           send_reply,
-                          send_error): 
+                          send_error):
         global target
         global command
         global size
@@ -57,7 +73,7 @@ class SOTAClientService(dbus.service.Object):
         print "---"
 
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -68,15 +84,15 @@ class SOTAClientService(dbus.service.Object):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.1)
-        print 
+        print
         print "Done."
 
         swm.dbus_method('org.genivi.software_loading_manager', 'download_complete', self.image_file, self.signature)
         return None
-    
+
     @dbus.service.method('org.genivi.sota_client')
     def update_report(self,
-                      update_id, 
+                      update_id,
                       results):
         global active
         print "Update report"
@@ -106,7 +122,7 @@ def usage():
     sys.exit(255)
 
 
-try:  
+try:
     opts, args= getopt.getopt(sys.argv[1:], "u:d:i:s:c")
 except getopt.GetoptError:
     print "Could not parse arguments."
@@ -135,14 +151,14 @@ if not image_file:
     print "No -i image_file provided."
     print
     usage()
-    
+
 # Can we open the confirmation file?
 try:
-   image_desc = open(image_file, "r")
+    image_desc = open(image_file, "r")
 except IOError as e:
     print "Could not open {} for reading: {}".format(image_file, e)
     sys.exit(255)
-    
+
 image_desc.close()
 
 print "Will simulate downloaded update:"
@@ -157,23 +173,23 @@ try:
 
     # USE CASE
     #
-    # This sota_client will send a update_available() call to the 
+    # This sota_client will send a update_available() call to the
     # software loading manager (SLM).
     #
     # If requested, SWLM will pop an operation confirmation dialog on the HMI.
     #
-    # If confirmed, SWLM will make an initiate_download() callback to 
+    # If confirmed, SWLM will make an initiate_download() callback to
     # this sota_client.
     #
     # The sota_client will, on simulated download completion, make a
-    # download_complete() call to the SLM to  indicate that the update is 
+    # download_complete() call to the SLM to  indicate that the update is
     # ready to be processed.
     #
     # The SLM will mount the provided image file as a loopback file system
     # and execute its update_manifest.json file. Each software operation in
     # the manifest file will be fanned out to its correct target (PackMgr,
     # ML, PartMgr)
-    # 
+    #
     # Once the update has been processed by SLM, an update operation
     # report will be sent back to SC and HMI.
     #
@@ -190,4 +206,3 @@ try:
 except Exception as e:
     print "Exception: {}".format(e)
     traceback.print_exc()
-
