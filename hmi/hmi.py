@@ -256,7 +256,7 @@ print
 #DBusGMainLoop(set_as_default=True)
 #pkg_mgr = HMIService()
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(LCMgrService, port = 90007)
+t = ThreadedServer(LCMgrService, port = swm.PORT_HMI)
 t.start()
 
 while True:

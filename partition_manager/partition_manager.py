@@ -264,7 +264,7 @@ print
 #DBusGMainLoop(set_as_default=True)
 #part_mgr = PartMgrService()
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(PartMgrService, port = 90003)
+t = ThreadedServer(PartMgrService, port = swm.PORT_PARTMGR)
 t.start()
 
 while True:

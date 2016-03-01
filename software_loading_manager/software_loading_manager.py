@@ -329,7 +329,7 @@ def usage():
 
 # register service over RPyC
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(SLMService, port = 90002)
+t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
 t.start()
 
 print

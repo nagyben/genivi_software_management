@@ -115,7 +115,7 @@ print
 #DBusGMainLoop(set_as_default=True)
 #pkg_mgr = LCMgrService()
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(LCMgrService, port = 90006)
+t = ThreadedServer(LCMgrService, port = swm.PORT_LCMGR)
 t.start()
 
 

@@ -194,7 +194,7 @@ try:
     # The above is replaced by the below
 
     from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(SOTAClientService, port = 90001)
+    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
     t.start()
 
     # USE CASE

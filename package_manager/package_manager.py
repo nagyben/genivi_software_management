@@ -193,7 +193,7 @@ print
 #DBusGMainLoop(set_as_default=True)
 #pkg_mgr = PkgMgrService()
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(PkgMgrService, port = 90004)
+t = ThreadedServer(PkgMgrService, port = swm.PORT_PACKMGR)
 t.start()
 
 while True:

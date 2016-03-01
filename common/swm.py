@@ -7,6 +7,7 @@
 #
 import dbus
 import traceback
+import rpyc
 
 SWM_RES_OK = 0
 SWM_RES_ALREADY_PROCESSED = 1
@@ -29,6 +30,16 @@ SWM_RES_OLD_VERSION = 17
 SWM_RES_INTERNAL_ERROR = 18
 SWM_RES_GENERAL_ERROR = 19
 _SWM_RES_FIRST_UNUSED = 20
+
+PORT_SC         = 90001
+PORT_SWLM       = 90002
+PORT_PARTMGR    = 90003
+PORT_PACKMGR    = 90004
+PORT_ECU1       = 90005
+PORT_LCMGR      = 90006
+PORT_HMI        = 90007
+
+swm_rpyc = rpyc.connect("localhost")
 
 def result(operation_id, code, text):
     if code < SWM_RES_OK or code >= _SWM_RES_FIRST_UNUSED:
