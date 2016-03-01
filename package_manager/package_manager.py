@@ -6,31 +6,40 @@
 
 
 
-import gtk
-import dbus
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
+#import gtk
+#import dbus
+#import dbus.service
+#from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
 import swm
 
+import rpyc
+
 #
 # Package manager service
 #
-class PkgMgrService(dbus.service.Object):
+class PkgMgrService(rpyc.Service):
     def __init__(self):
-        bus_name = dbus.service.BusName('org.genivi.package_manager', bus=dbus.SessionBus())
-        dbus.service.Object.__init__(self, bus_name, '/org/genivi/package_manager')
+        #bus_name = dbus.service.BusName('org.genivi.package_manager', bus=dbus.SessionBus())
+        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/package_manager')
+        pass
 
 
-    @dbus.service.method('org.genivi.package_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def install_package(self, 
+    #@dbus.service.method('org.genivi.package_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):
+        """ function to expose install_pacakge over rpyc
+        """
+        return install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error)
+
+    def install_package(self,
                         transaction_id,
                         image_path,
                         blacklisted_packages,
-                        send_reply, 
-                        send_error): 
+                        send_reply,
+                        send_error):
 
         try:
             print "Package Manager: Install Package"
@@ -41,7 +50,7 @@ class PkgMgrService(dbus.service.Object):
 
             #
             # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do 
+            # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
             send_reply(True)
@@ -52,7 +61,7 @@ class PkgMgrService(dbus.service.Object):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
-            print  
+            print
             print "Done"
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
@@ -64,18 +73,23 @@ class PkgMgrService(dbus.service.Object):
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
         return None
-        
-            
 
-    @dbus.service.method('org.genivi.package_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def upgrade_package(self, 
+
+    #@dbus.service.method('org.genivi.package_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error):
+        """ function to expose upgrade_package over rpyc
+        """
+        return upgrade_package(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
+
+    def upgrade_package(self,
                         transaction_id,
                         image_path,
                         blacklisted_packages,
                         allow_downgrade,
-                        send_reply, 
-                        send_error): 
+                        send_reply,
+                        send_error):
 
         try:
             print "Package Manager: Upgrade package"
@@ -87,7 +101,7 @@ class PkgMgrService(dbus.service.Object):
 
             #
             # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do 
+            # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
             send_reply(True)
@@ -98,7 +112,7 @@ class PkgMgrService(dbus.service.Object):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
-            print  
+            print
             print "Done"
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
@@ -112,13 +126,19 @@ class PkgMgrService(dbus.service.Object):
                                       "Internal_error: {}".format(e))
         return None
 
-    @dbus.service.method('org.genivi.package_manager',
-                         async_callbacks=('send_reply', 'send_error'))
-    def remove_package(self, 
+    #@dbus.service.method('org.genivi.package_manager',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_remove_package(self, transaction_id, package_id, send_reply, send_error):
+        """ function to expose remove_package over rpyc
+        """
+        return remove_package(self, transaction_id, package_id, send_reply, send_error)
+
+    def remove_package(self,
                        transaction_id,
                        package_id,
-                       send_reply, 
-                       send_error): 
+                       send_reply,
+                       send_error):
         try:
             print "Package Manager: Remove package"
             print "  Operation Transaction ID: {}".format(transaction_id)
@@ -127,7 +147,7 @@ class PkgMgrService(dbus.service.Object):
 
             #
             # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do 
+            # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
             send_reply(True)
@@ -138,7 +158,7 @@ class PkgMgrService(dbus.service.Object):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
-            print  
+            print
             print "Done"
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
@@ -152,20 +172,30 @@ class PkgMgrService(dbus.service.Object):
         return None
         return None
 
-    @dbus.service.method('org.genivi.package_manager')
-    def get_installed_packages(self): 
+    #@dbus.service.method('org.genivi.package_manager')
+
+    def exposed_get_installed_packages(self):
+        """ function to expose get_installed_packages over rpyc
+        """
+        return get_installed_packages(self)
+
+    def get_installed_packages(self):
         print "Got get_installed_packages()"
         return [ 'bluez_driver_1.2.2', 'bluez_apps_2.4.4' ]
-                 
 
 
-print 
+
+print
 print "Package Manager."
 print
 
 
-DBusGMainLoop(set_as_default=True)
-pkg_mgr = PkgMgrService()
+#DBusGMainLoop(set_as_default=True)
+#pkg_mgr = PkgMgrService()
+from rpyc.utils.server import ThreadedServer
+t = ThreadedServer(PkgMgrService, port = 90004)
+t.start()
 
 while True:
+    #TODO: gtk.main_interaction()
     gtk.main_iteration()

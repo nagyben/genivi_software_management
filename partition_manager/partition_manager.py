@@ -262,7 +262,10 @@ print
 print "Partition Manager."
 print
 #DBusGMainLoop(set_as_default=True)
-part_mgr = PartMgrService()
+#part_mgr = PartMgrService()
+from rpyc.utils.server import ThreadedServer
+t = ThreadedServer(PartMgrService, port = 90003)
+t.start()
 
 while True:
     #TODO: gtk.main_interaction()
