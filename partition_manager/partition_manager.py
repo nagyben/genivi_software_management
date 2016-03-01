@@ -107,8 +107,7 @@ class PartMgrService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        #TODO: dbus reply
-        send_reply(True)
+        #send_reply(True)
 
         # Simulate install
         print "Resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
@@ -268,5 +267,4 @@ t = ThreadedServer(PartMgrService, port = swm.PORT_PARTMGR)
 t.start()
 
 #while True:
-#    #TODO: gtk.main_interaction()
 #    gtk.main_iteration()
