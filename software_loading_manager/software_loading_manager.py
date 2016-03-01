@@ -4,9 +4,9 @@
 #
 # Python dbus service that coordinates all use cases.
 #
-import gtk
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
+#import gtk
+#import dbus.service
+#from dbus.mainloop.glib import DBusGMainLoop
 import manifest_processor
 import traceback
 import sys
@@ -21,21 +21,21 @@ class SLMService(dbus.service.Object):
     def __init__(self, db_path):
         self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
         # Define our own bus name
-        bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())        
+        bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
         # Define our own object on the software_loading_manager bus
         dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
 
-            
+
     def initiate_download(self, package_id):
         swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
 
-    # 
+    #
     # Distribute a report of a completed installation
     # to all involved parties. So far those parties are
     # the HMI and the SOTA client
     #
-    def distribute_update_result(self, 
-                                 update_id, 
+    def distribute_update_result(self,
+                                 update_id,
                                  results):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
@@ -54,11 +54,11 @@ class SLMService(dbus.service.Object):
 
         manifest = self.get_current_manifest()
         self.inform_hmi_of_new_manifest(manifest)
-        # 
+        #
         # This whole manifest may already have been executed and stored
         # as completed by the manifest_processor. If so, distribute the
         # given result
-        # 
+        #
         if not manifest.start_next_operation():
             self.distribute_update_result(manifest.update_id,
                                           manifest.operation_results)
@@ -67,12 +67,12 @@ class SLMService(dbus.service.Object):
 
         self.inform_hmi_of_new_operation(manifest.active_operation)
         return True
-        
+
     def inform_hmi_of_new_operation(self,op):
         swm.dbus_method("org.genivi.hmi", "operation_started",
                         op.operation_id, op.time_estimate, op.description)
         return None
-    
+
     def inform_hmi_of_new_manifest(self,manifest):
         total_time = 0
         for op in manifest.operations:
@@ -81,13 +81,13 @@ class SLMService(dbus.service.Object):
         swm.dbus_method("org.genivi.hmi", "manifest_started",
                         manifest.update_id, total_time, manifest.description)
         return None
-    
+
     def start_next_operation(self):
         #
         # If we are currently not processing an image, load
         # the one we just queued.
         #
-        
+
         #
         # No manifest loaded.
         # Load next manifest and, if successful, start the
@@ -115,23 +115,24 @@ class SLMService(dbus.service.Object):
         self.inform_hmi_of_new_operation(manifest.active_operation)
         return True
 
+    #TODO: dbus method
     @dbus.service.method("org.genivi.software_loading_manager",
                          async_callbacks=('send_reply', 'send_error'))
-    def update_available(self, 
-                         update_id, 
-                         description, 
+    def update_available(self,
+                         update_id,
+                         description,
                          signature,
                          request_confirmation,
                          send_reply,
-                         send_error): 
+                         send_error):
 
         print "Got download available"
         print "  ID:      {}".format(update_id)
         print "  descr:   {}".format(description)
         print "  confirm: {}".format(request_confirmation)
-        
+
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -152,19 +153,19 @@ class SLMService(dbus.service.Object):
         self.initiate_download(update_id)
         return None
 
-
+    #TODO: dbus method
     @dbus.service.method("org.genivi.software_loading_manager",
                          async_callbacks=('send_reply', 'send_error'))
-    def update_confirmation(self,        
-                            update_id, 
+    def update_confirmation(self,
+                            update_id,
                             approved,
-                            send_reply, 
-                            send_error): 
+                            send_reply,
+                            send_error):
 
-        
+
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -175,7 +176,7 @@ class SLMService(dbus.service.Object):
         if approved:
             #
             # Call the SOTA client and ask it to start the download.
-            # Once the download is complete, SOTA client will call 
+            # Once the download is complete, SOTA client will call
             # download complete on this process to actually
             # process the package.
             #
@@ -190,21 +191,22 @@ class SLMService(dbus.service.Object):
                 swm.result('N/A',
                            swm.SWM_RES_USER_DECLINED,
                            "Installation declined by user")
-            ]) 
+            ])
 
             print "Declined. Called sota_client.installation_report()"
             print "---"
 
         return None
 
-    @dbus.service.method("org.genivi.software_loading_manager", 
+    #TODO: dbus method
+    @dbus.service.method("org.genivi.software_loading_manager",
                          async_callbacks=('send_reply', 'send_error'))
     def download_complete(self,
                           update_image,
                           signature,
                           send_reply,
-                          send_error): 
-            
+                          send_error):
+
         print "Got download complete"
         print "  path:      {}".format(update_image)
         print "  signature: {}".format(signature)
@@ -212,7 +214,7 @@ class SLMService(dbus.service.Object):
 
         #
         # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do 
+        # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
         send_reply(True)
@@ -236,14 +238,16 @@ class SLMService(dbus.service.Object):
     # once they have completed their process_update() calls invoked
     # by software_loading_manager
     #
+
+    #TODO: dbus method
     @dbus.service.method("org.genivi.software_loading_manager",
                          async_callbacks=('send_reply', 'send_error'))
-    def operation_result(self, 
-                         transaction_id, 
-                         result_code, 
+    def operation_result(self,
+                         transaction_id,
+                         result_code,
                          result_text,
                          send_reply,
-                         send_error): 
+                         send_error):
 
         try:
             print "Got operation_result()"
@@ -253,7 +257,7 @@ class SLMService(dbus.service.Object):
             print "---"
 
             # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do 
+            # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
             #
             send_reply(True)
@@ -271,9 +275,9 @@ class SLMService(dbus.service.Object):
             print "Failed to process operation result: {}".format(e)
             traceback.print_exc()
 
-
+    #TODO: dbus method
     @dbus.service.method("org.genivi.software_loading_manager")
-    def get_installed_packages(self, include_packegs, include_module_firmware): 
+    def get_installed_packages(self, include_packegs, include_module_firmware):
         print "Got get_installed_packages()"
         return [ "bluez_driver", "bluez_apps" ]
 
@@ -287,11 +291,11 @@ def usage():
     sys.exit(255)
 
 
-print 
+print
 print "Software Loading Manager."
 print
 
-try:  
+try:
     opts, args= getopt.getopt(sys.argv[1:], "rd:")
 
 except getopt.GetoptError:
