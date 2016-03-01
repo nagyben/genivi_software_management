@@ -14,19 +14,27 @@ import getopt
 import os
 import swm
 
+import rpyc
+
 #
 # Define the DBUS-facing Software Loading Manager service
 #
-class SLMService(dbus.service.Object):
+class SLMService(rpyc.Service):
     def __init__(self, db_path):
         self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
         # Define our own bus name
-        bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
+        #bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
         # Define our own object on the software_loading_manager bus
-        dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
+        #dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
 
+
+    def exposed_initiate_download(self, package_id):
+        """ function to expose update_report to RPyC
+        """
+        return initiate_download(self, package_id)
 
     def initiate_download(self, package_id):
+        #TODO: dbus method call
         swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
 
     #
@@ -39,10 +47,12 @@ class SLMService(dbus.service.Object):
                                  results):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
+        #TODO: dbus method call
         swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
 
         # Send installation report to SOTA
         print "Sending report to sota.update_report()"
+        #TODO: dbus method call
         swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
 
     def get_current_manifest(self):
@@ -69,6 +79,7 @@ class SLMService(dbus.service.Object):
         return True
 
     def inform_hmi_of_new_operation(self,op):
+        #TODO: dbus method call
         swm.dbus_method("org.genivi.hmi", "operation_started",
                         op.operation_id, op.time_estimate, op.description)
         return None
@@ -78,6 +89,7 @@ class SLMService(dbus.service.Object):
         for op in manifest.operations:
             total_time = total_time + op.time_estimate
 
+        #TODO: dbus method call
         swm.dbus_method("org.genivi.hmi", "manifest_started",
                         manifest.update_id, total_time, manifest.description)
         return None
@@ -115,9 +127,14 @@ class SLMService(dbus.service.Object):
         self.inform_hmi_of_new_operation(manifest.active_operation)
         return True
 
-    #TODO: dbus method
-    @dbus.service.method("org.genivi.software_loading_manager",
-                         async_callbacks=('send_reply', 'send_error'))
+    #@dbus.service.method("org.genivi.software_loading_manager",
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error):
+        """ function to expose update_available over RPyC
+        """
+        return update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error)
+
     def update_available(self,
                          update_id,
                          description,
@@ -153,9 +170,14 @@ class SLMService(dbus.service.Object):
         self.initiate_download(update_id)
         return None
 
-    #TODO: dbus method
-    @dbus.service.method("org.genivi.software_loading_manager",
-                         async_callbacks=('send_reply', 'send_error'))
+    #@dbus.service.method("org.genivi.software_loading_manager",
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_update_confirmation(self, update_id, approved, send_reply, send_error):
+        """ function to expose update_confirmation over RPyC
+        """
+        return update_confirmation(self, update_id, approved, send_reply, send_error)
+
     def update_confirmation(self,
                             update_id,
                             approved,
@@ -198,9 +220,14 @@ class SLMService(dbus.service.Object):
 
         return None
 
-    #TODO: dbus method
-    @dbus.service.method("org.genivi.software_loading_manager",
-                         async_callbacks=('send_reply', 'send_error'))
+    #@dbus.service.method("org.genivi.software_loading_manager",
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_download_complete(self, update_image, signature, send_reply, send_error):
+        """ function to expose download_complete over RPyC
+        """
+        return download_complete(self, update_image, signature, send_reply, send_error)
+
     def download_complete(self,
                           update_image,
                           signature,
@@ -239,9 +266,14 @@ class SLMService(dbus.service.Object):
     # by software_loading_manager
     #
 
-    #TODO: dbus method
-    @dbus.service.method("org.genivi.software_loading_manager",
-                         async_callbacks=('send_reply', 'send_error'))
+    #@dbus.service.method("org.genivi.software_loading_manager",
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_operation_result(self, transaction_id, result_code, result_text, send_reply, send_error):
+        """ function to expose operation_result over RPyC
+        """
+        return operation_result(self, transaction_id, result_code, result_text, send_reply, send_error)
+
     def operation_result(self,
                          transaction_id,
                          result_code,
@@ -259,9 +291,7 @@ class SLMService(dbus.service.Object):
             # Send back an immediate reply since DBUS
             # doesn't like python dbus-invoked methods to do
             # their own calls (nested calls).
-            #
-            send_reply(True)
-
+            #SOTAClientService
             manifest = self.get_current_manifest()
             if not manifest:
                 print "Warning: No manifest to handle callback reply"
@@ -275,8 +305,13 @@ class SLMService(dbus.service.Object):
             print "Failed to process operation result: {}".format(e)
             traceback.print_exc()
 
-    #TODO: dbus method
-    @dbus.service.method("org.genivi.software_loading_manager")
+    #@dbus.service.method("org.genivi.software_loading_manager")
+
+    def exposed_get_installed_packages(self, include_packegs, include_module_firmware):
+        """ function to expose get_installed_packages over RPyC
+        """
+        return get_installed_packages(self, include_packegs, include_module_firmware)
+
     def get_installed_packages(self, include_packegs, include_module_firmware):
         print "Got get_installed_packages()"
         return [ "bluez_driver", "bluez_apps" ]
@@ -290,6 +325,12 @@ def usage():
     print "Example:", sys.argv[0],"-r -d /tmp/database"
     sys.exit(255)
 
+# === Entry point ===
+
+# register service over RPyC
+from rpyc.utils.server import ThreadedServer
+t = ThreadedServer(SLMService, port = 90002)
+t.start()
 
 print
 print "Software Loading Manager."
@@ -314,7 +355,7 @@ for o, a in opts:
         print "Unknown option: {}".format(o)
         usage()
 
-DBusGMainLoop(set_as_default=True)
+#DBusGMainLoop(set_as_default=True)
 
 # Check if we are to delete the old database.
 if reset_db:
@@ -327,4 +368,5 @@ if reset_db:
 slm_sota = SLMService(db_path)
 
 while True:
+    #TODO: gtk.main_interaction()
     gtk.main_iteration()

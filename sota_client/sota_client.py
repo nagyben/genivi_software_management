@@ -6,7 +6,7 @@
 # of Software Loading manager.
 
 
-import gtk
+#import gtk
 #import dbus
 #import dbus.service
 #from dbus.mainloop.glib import DBusGMainLoop
@@ -65,7 +65,8 @@ class SOTAClientService(rpyc.Service):
     #                     async_callbacks=('send_reply', 'send_error'))
 
     def exposed_initiate_download(self, update_id, send_reply, send_error):
-        # function to expose initiate_download to RPyC
+        """ function to expose initiate_download to RPyC
+        """
         return initiate_download(self, update_id, send_reply, send_error)
 
     def initiate_download(self,
@@ -105,7 +106,8 @@ class SOTAClientService(rpyc.Service):
     #@dbus.service.method('org.genivi.sota_client')
 
     def exposed_update_report(self, update_id, results):
-        # function to expose update_report to RPyC
+        """ function to expose update_report to RPyC
+        """
         return update_report(self, update_id, results)
 
     def update_report(self,
@@ -214,9 +216,8 @@ try:
     # the manifest file will be fanned out to its correct target (PackMgr,
     # ML, PartMgr)
     #
-    # Once the update has been processed by SLM, an update operation
-    # report will be sent back to SC and HMI.
-    #
+    # Once the update has been processed by SLM, an u@dbus
+    #TODO: dbus method call
     swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
                     update_id, description, signature, request_confirmation)
 
