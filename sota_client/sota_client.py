@@ -7,9 +7,9 @@
 
 
 import gtk
-import dbus
-import dbus.service
-from dbus.mainloop.glib import DBusGMainLoop
+#import dbus
+#import dbus.service
+#from dbus.mainloop.glib import DBusGMainLoop
 import getopt
 import sys
 import time
@@ -25,6 +25,7 @@ signature='d2889ee6bc1fe1f3d7c5cdaca78384776bf437b7c6ca4db0e2c8b1d22cdb8f4e'
 update_file=''
 active=True
 class SOTAClientService(rpyc.Service):
+
     def __init__(self, image_file, signature):
 
         # Store where we have the image file
@@ -34,17 +35,22 @@ class SOTAClientService(rpyc.Service):
         self.signature = signature
 
         # Define our own bus name
-        bus_name = dbus.service.BusName('org.genivi.sota_client', bus=dbus.SessionBus())
+        #bus_name = dbus.service.BusName('org.genivi.sota_client', bus=dbus.SessionBus())
+        # ===
+        # Using RPyC means we register the service outside of the class
+        # ===
 
         # Define our own object on the sota_client bus
-        dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
+        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
 
     def on_connect(self):
         # code runs when connection is created
+        print "Client connected"
         pass
 
     def on_disconnect(self):
         # code runs when the connection has closed
+        print "Client disconnected"
         pass
 
     def exposed_get_answer(self):
@@ -55,8 +61,12 @@ class SOTAClientService(rpyc.Service):
         # a method which is not exposed
         return "This is not exposed"
 
-    @dbus.service.method('org.genivi.sota_client',
-                         async_callbacks=('send_reply', 'send_error'))
+    #@dbus.service.method('org.genivi.sota_client',
+    #                     async_callbacks=('send_reply', 'send_error'))
+
+    def exposed_initiate_download(self, update_id, send_reply, send_error):
+        # function to expose initiate_download to RPyC
+        return initiate_download(self, update_id, send_reply, send_error)
 
     def initiate_download(self,
                           update_id,
@@ -76,7 +86,7 @@ class SOTAClientService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         #  Simulate download
         print "Downloading"
@@ -87,10 +97,17 @@ class SOTAClientService(rpyc.Service):
         print
         print "Done."
 
-        swm.dbus_method('org.genivi.software_loading_manager', 'download_complete', self.image_file, self.signature)
+        #swm.dbus_method('org.genivi.software_loading_manager', 'download_complete', self.image_file, self.signature)
+
+
         return None
 
-    @dbus.service.method('org.genivi.sota_client')
+    #@dbus.service.method('org.genivi.sota_client')
+
+    def exposed_update_report(self, update_id, results):
+        # function to expose update_report to RPyC
+        return update_report(self, update_id, results)
+
     def update_report(self,
                       update_id,
                       results):
@@ -122,6 +139,7 @@ def usage():
     sys.exit(255)
 
 
+# === entry point ===
 try:
     opts, args= getopt.getopt(sys.argv[1:], "u:d:i:s:c")
 except getopt.GetoptError:
@@ -168,8 +186,14 @@ print "Image file:         {}".format(image_file)
 print "User Confirmation:  {}".format(request_confirmation)
 
 try:
-    DBusGMainLoop(set_as_default=True)
-    sota_svc = SOTAClientService(image_file, signature)
+    #DBusGMainLoop(set_as_default=True)
+
+    #sota_svc = SOTAClientService(image_file, signature)
+    # The above is replaced by the below
+
+    from rpyc.utils.server import ThreadedServer
+    t = ThreadedServer(SOTAClientService, port = 90001)
+    t.start()
 
     # USE CASE
     #
@@ -201,6 +225,7 @@ try:
 
     # Active will be set to false by installation_report()
     while active:
+        # TODO: what is main_interaction()?
         gtk.main_iteration()
 
 except Exception as e:
