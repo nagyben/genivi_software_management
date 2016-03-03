@@ -20,19 +20,29 @@ import rpyc
 # Package manager service
 #
 class PkgMgrService(rpyc.Service):
-    def __init__(self):
-        #bus_name = dbus.service.BusName('org.genivi.package_manager', bus=dbus.SessionBus())
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/package_manager')
-        pass
-
+    #def __init__(self):
+    #    print "init package manager"
+    #    #super(PkgMgrService, self).__init__(self._conn)
+    #    #bus_name = dbus.service.BusName('org.genivi.package_manager', bus=dbus.SessionBus())
+    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/package_manager')
+    #    pass
 
     #@dbus.service.method('org.genivi.package_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
 
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        pass
+
     def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):
         """ function to expose install_pacakge over rpyc
         """
-        return install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error)
+        return self.install_package(transaction_id, image_path, blacklisted_packages, send_reply, send_error)
 
     def install_package(self,
                         transaction_id,
@@ -68,7 +78,8 @@ class PkgMgrService(rpyc.Service):
                                       "Installation successful. Path: {}".format(image_path))
         except Exception as e:
             print "install_package() Exception: {}".format(e)
-            traceback.print_exc()
+            # traceback.print_exc()
+            e.print_exc()
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
@@ -81,7 +92,7 @@ class PkgMgrService(rpyc.Service):
     def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error):
         """ function to expose upgrade_package over rpyc
         """
-        return upgrade_package(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
+        return self.upgrade_package(transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
 
     def upgrade_package(self,
                         transaction_id,
@@ -120,7 +131,8 @@ class PkgMgrService(rpyc.Service):
 
         except Exception as e:
             print "upgrade_package() Exception: {}".format(e)
-            traceback.print_exc()
+            #traceback.print_exc()
+            e.print_exc()
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
@@ -132,7 +144,7 @@ class PkgMgrService(rpyc.Service):
     def exposed_remove_package(self, transaction_id, package_id, send_reply, send_error):
         """ function to expose remove_package over rpyc
         """
-        return remove_package(self, transaction_id, package_id, send_reply, send_error)
+        return self.remove_package(transaction_id, package_id, send_reply, send_error)
 
     def remove_package(self,
                        transaction_id,
@@ -165,7 +177,8 @@ class PkgMgrService(rpyc.Service):
                                       "Removal successful. Package_id: {}".format(package_id))
         except Exception as e:
             print "upgrade_package() Exception: {}".format(e)
-            traceback.print_exc()
+            #traceback.print_exc()
+            e.print_exc()
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
@@ -177,7 +190,7 @@ class PkgMgrService(rpyc.Service):
     def exposed_get_installed_packages(self):
         """ function to expose get_installed_packages over rpyc
         """
-        return get_installed_packages(self)
+        return self.get_installed_packages()
 
     def get_installed_packages(self):
         print "Got get_installed_packages()"
@@ -194,8 +207,9 @@ print
 #pkg_mgr = PkgMgrService()
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PkgMgrService, port = swm.PORT_PACKMGR)
+
+print "Starting Package Manager rpyc service on port " + str(swm.PORT_PACKMGR)
 t.start()
 
 #while True:
-#    #TODO: gtk.main_interaction()
 #    gtk.main_iteration()

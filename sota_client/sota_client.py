@@ -208,7 +208,7 @@ try:
     # this sota_client.
     #
     # The sota_client will, on simulated download completion, make a
-    # download_complete() call to the SLM to  indicate that the update is
+    # download_complete() call to the SLM to indicate that the update is
     # ready to be processed.
     #
     # The SLM will mount the provided image file as a loopback file system
@@ -229,6 +229,9 @@ try:
     #while active:
     #    gtk.main_iteration()
 
+
 except Exception as e:
     print "Exception: {}".format(e)
     traceback.print_exc()
+
+import conn

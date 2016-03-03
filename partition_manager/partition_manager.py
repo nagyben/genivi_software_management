@@ -21,17 +21,27 @@ import rpyc
 #
 class PartMgrService(rpyc.Service):
     def __init__(self):
-        pass
+        super(PartMgrService, self).__init__()
         #bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
+        pass
 
     #@dbus.service.method('org.genivi.partition_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
 
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        pass
+
     def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
         """ function to expose create_disk_partition over RPyC
         """
-        return create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
+        return self.create_disk_partition(transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
 
     def create_disk_partition(self,
                               transaction_id,
@@ -83,7 +93,7 @@ class PartMgrService(rpyc.Service):
     def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error):
         """ function to expose resize_disk_partition over RPyC
         """
-        return resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error)
+        return self.resize_disk_partition(transaction_id, disk, partition_number, start, size, send_reply, send_error)
 
     def resize_disk_partition(self,
                               transaction_id,
@@ -125,14 +135,15 @@ class PartMgrService(rpyc.Service):
     #@dbus.service.method('org.genivi.partition_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
 
-    def exposed_delete_disk_partition(self, transaction_id, disk, send_reply, send_error):
+    def exposed_delete_disk_partition(self, transaction_id, disk, partition_number, send_reply, send_error):
         """ function to expose delete_disk_partition over rpyc
         """
-        return delete_disk_partition(self, transaction_id, disk, send_reply, send_error)
+        return self.delete_disk_partition(transaction_id, disk, partition_number, send_reply, send_error)
 
     def delete_disk_partition(self,
                               transaction_id,
                               disk,
+                              partition_number,
                               send_reply,
                               send_error):
 
@@ -169,7 +180,7 @@ class PartMgrService(rpyc.Service):
     def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
         """ function to expose write_disk_partition over rpyc
         """
-        return write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+        return self.write_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
 
     def write_disk_partition(self,
                              transaction_id,
@@ -216,7 +227,7 @@ class PartMgrService(rpyc.Service):
     def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
         """ function to expose patch_disk_partition over rpyc
         """
-        return patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+        return self.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
 
     def patch_disk_partition(self,
                              transaction_id,

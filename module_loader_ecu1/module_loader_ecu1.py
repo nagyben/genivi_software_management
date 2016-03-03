@@ -21,6 +21,7 @@ import rpyc
 #
 class ECU1ModuleLoaderService(rpyc.Service):
     def __init__(self):
+        #super(ECU1ModuleLoaderService, self).__init__()
         #bus_name = dbus.service.BusName('org.genivi.module_loader_ecu1', bus=dbus.SessionBus())
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/module_loader_ecu1')
         pass
@@ -28,10 +29,19 @@ class ECU1ModuleLoaderService(rpyc.Service):
     #@dbus.service.method('org.genivi.module_loader_ecu1',
     #                     async_callbacks=('send_reply', 'send_error'))
 
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        pass
+
     def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error):
         """ function to expose flash_module_firmware over RPyC
         """
-        return flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error)
+        return self.flash_module_firmware(transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error)
 
     def flash_module_firmware(self,
                               transaction_id,
@@ -74,7 +84,7 @@ class ECU1ModuleLoaderService(rpyc.Service):
     def exposed_get_module_firmware_version(self):
         """ function to expose get_module_firmware_version over RPyC
         """
-        return get_module_firmware_version(self)
+        return self.get_module_firmware_version()
 
     def get_module_firmware_version(self):
         print "Got get_installed_packages()"
@@ -86,10 +96,10 @@ print
 
 #DBusGMainLoop(set_as_default=True)
 #module_loader_ecu1 = ECU1ModuleLoaderService()
+print "Starting ECU1 Module Loader rpyc service..."
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(ECU1ModuleLoaderService, port = swm.PORT_ECU1)
 t.start()
 
 #while True:
-#    #FIXME: gtk.main_interaction()
 #    gtk.main_iteration()

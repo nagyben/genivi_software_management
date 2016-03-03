@@ -1,11 +1,20 @@
 PORT LIST FOR GENIVI SWM RPYC SERVICES
 
-Service				Port
+Service				                 Port
 ---------------------------+------------+
-sota_client			90001
-software_loading_manager	90002
-partition_manager		90003
-package_manager			90004
-module_loader_ecu1		90005
-lifecycle_manager		90006
-hmi				90007
+sota_client			               18001
+software_loading_manager	     18002
+partition_manager		           18003
+package_manager			           18004
+module_loader_ecu1		         18005
+lifecycle_manager		           18006
+hmi				                     18007
+
+Launch order:
+1. package_manager
+2. partition_manager
+3. module_loader_ecu1
+4. software_loading_manager
+5. lifecycle_manager
+6. hmi
+7. (if not interactive mode) sota_client

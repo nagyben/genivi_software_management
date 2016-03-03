@@ -11,7 +11,6 @@
 #from dbus.mainloop.glib import DBusGMainLoop
 import time
 import threading
-import code, signal
 import traceback
 import swm
 from termios import tcflush, TCIOFLUSH
@@ -84,13 +83,25 @@ class DisplayProgress(threading.Thread):
 # Human Machine Interface Service
 #
 class HMIService(rpyc.Service):
+    swlm_rpyc = 0
+
     def __init__(self):
+        #super(HMIService, self).__init__()
         #bus_name = dbus.service.BusName('org.genivi.hmi',
         #                                bus=dbus.SessionBus())
         #
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/hmi')
         self.progress_thread = DisplayProgress()
         self.progress_thread.start()
+
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
 
 
     #@dbus.service.method('org.genivi.hmi',
@@ -99,7 +110,7 @@ class HMIService(rpyc.Service):
     def exposed_update_notification(self, update_id, description, send_reply, send_error):
         """ function to expose update_notification over rpyc
         """
-        return update_notification(self, update_id, description, send_reply, send_error)
+        return self.update_notification(update_id, description, send_reply, send_error)
 
     def update_notification(self,
                             update_id,
@@ -148,7 +159,7 @@ class HMIService(rpyc.Service):
             # to inform it of user approval / decline.
             #
             #swm.dbus_method('org.genivi.software_loading_manager','update_confirmation', update_id, approved)
-            swm.swlm_rpyc.root.update_confirmation(update_id, approved)
+            self.swlm_rpyc.root.update_confirmation(update_id, approved)
 
         except Exception as e:
             print "Exception: {}".format(e)
@@ -163,7 +174,7 @@ class HMIService(rpyc.Service):
     def exposed_manifest_started(self, update_id, total_time_estimate, description, send_reply, send_error):
         """ function to expose manifest_started over rpyc
         """
-        return manifest_started(self, update_id, total_time_estimate, description, send_reply, send_error)
+        return self.manifest_started(update_id, total_time_estimate, description, send_reply, send_error)
 
     def manifest_started(self,
                          update_id,
@@ -193,7 +204,7 @@ class HMIService(rpyc.Service):
     def exposed_operation_started(self, operation_id, time_estimate, description, send_reply, send_error):
         """ function to expose operation_started over rpyc
         """
-        return operation_started(self, operation_id, time_estimate, description, send_reply, send_error)
+        return self.operation_started(operation_id, time_estimate, description, send_reply, send_error)
 
     def operation_started(self,
                           operation_id,
@@ -218,7 +229,7 @@ class HMIService(rpyc.Service):
     def exposed_update_report(self, update_id, results, send_reply, send_error):
         """ function to expose update_report over rpyc
         """
-        return update_report(self, update_id, results, send_reply, send_error)
+        return self.update_report(update_id, results, send_reply, send_error)
 
     def update_report(self,
                       update_id,
@@ -252,7 +263,7 @@ print
 #DBusGMainLoop(set_as_default=True)
 #pkg_mgr = HMIService()
 from rpyc.utils.server import ThreadedServer
-t = ThreadedServer(LCMgrService, port = swm.PORT_HMI)
+t = ThreadedServer(HMIService, port = swm.PORT_HMI)
 t.start()
 
 #while True:

@@ -21,6 +21,7 @@ import rpyc
 #
 class LCMgrService(rpyc.Service):
     def __init__(self):
+        #super(LCMgrService, self).__init__()
         #bus_name = dbus.service.BusName('org.genivi.lifecycle_manager', dbus.SessionBus())
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/lifecycle_manager')
         pass
@@ -28,10 +29,19 @@ class LCMgrService(rpyc.Service):
     #@dbus.service.method('org.genivi.lifecycle_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
 
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        pass
+
     def exposed_start_components(self, transaction_id, components, send_reply, send_error):
         """ function to expose start_components over RPyC
         """
-        return start_components(self, transaction_id, components, send_reply, send_error)
+        return self.start_components(transaction_id, components, send_reply, send_error)
 
     def start_components(self,
                          transaction_id,
@@ -70,7 +80,7 @@ class LCMgrService(rpyc.Service):
     def exposed_stop_components(self, transaction_id, components, send_reply, send_error):
         """ function to expose stop_components over RPyC
         """
-        return stop_components(self, transaction_id, components, send_reply, send_error)
+        return self.stop_components(transaction_id, components, send_reply, send_error)
 
     def stop_components(self,
                         transaction_id,

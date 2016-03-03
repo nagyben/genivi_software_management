@@ -20,22 +20,44 @@ import rpyc
 # Define the DBUS-facing Software Loading Manager service
 #
 class SLMService(rpyc.Service):
+    sc_rpyc = 0
+    hmi_rpyc = 0
+
     def __init__(self, db_path):
+        print "init swlm"
+        #super(SLMService, self).__init__(self._conn)
         self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
         # Define our own bus name
         #bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
         # Define our own object on the software_loading_manager bus
         #dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
 
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        print "Initializing rpyc connections..."
+        try:
+            self.sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
+            self.hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+            print "Rpyc connections initialized."
+            return True
+        except Exception:
+            "Failed to initialize rpyc connections!"
+            return False
+
 
     def exposed_initiate_download(self, package_id):
         """ function to expose update_report to RPyC
         """
-        return initiate_download(self, package_id)
+        return self.initiate_download(package_id)
 
     def initiate_download(self, package_id):
         #swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
-        swm.sc_rpyc.root.initiate_download(package_id)
+        self.sc_rpyc.root.initiate_download(package_id)
 
     #
     # Distribute a report of a completed installation
@@ -48,12 +70,12 @@ class SLMService(rpyc.Service):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
         #swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
-        swm.hmi_rpyc.root.update_report(update_id, results)
+        self.hmi_rpyc.root.update_report(update_id, results)
 
         # Send installation report to SOTA
         print "Sending report to sota.update_report()"
         #swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
-        swm.sc_rpyc.root.update_report(update_id, results)
+        self.sc_rpyc.root.update_report(update_id, results)
 
     def get_current_manifest(self):
         return self.manifest_processor.current_manifest
@@ -81,7 +103,7 @@ class SLMService(rpyc.Service):
     def inform_hmi_of_new_operation(self,op):
         #swm.dbus_method("org.genivi.hmi", "operation_started",
         #                op.operation_id, op.time_estimate, op.description)
-        swm.hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
+        self.hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
         return None
 
     def inform_hmi_of_new_manifest(self,manifest):
@@ -91,7 +113,7 @@ class SLMService(rpyc.Service):
 
         #swm.dbus_method("org.genivi.hmi", "manifest_started",
         #                manifest.update_id, total_time, manifest.description)
-        swm.hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
+        self.hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
         return None
 
     def start_next_operation(self):
@@ -133,7 +155,7 @@ class SLMService(rpyc.Service):
     def exposed_update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error):
         """ function to expose update_available over RPyC
         """
-        return update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error)
+        return self.update_available(update_id, description, signature, request_confirmation, send_reply, send_error)
 
     def update_available(self,
                          update_id,
@@ -152,7 +174,7 @@ class SLMService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         #
         # Send a notification to the HMI to get user approval / decline
@@ -160,7 +182,9 @@ class SLMService(rpyc.Service):
         # to drive the use case forward.
         #
         if request_confirmation:
-            swm.dbus_method("org.genivi.hmi", "update_notification", update_id, description)
+            #swm.dbus_method("org.genivi.hmi", "update_notification", update_id, description)
+            self.hmi_rpyc.root.update_notification(update_id, description)
+
             print "  Called hmi.update_notification()"
             print "---"
             return None
@@ -176,7 +200,7 @@ class SLMService(rpyc.Service):
     def exposed_update_confirmation(self, update_id, approved, send_reply, send_error):
         """ function to expose update_confirmation over RPyC
         """
-        return update_confirmation(self, update_id, approved, send_reply, send_error)
+        return self.update_confirmation( update_id, approved, send_reply, send_error)
 
     def update_confirmation(self,
                             update_id,
@@ -190,7 +214,7 @@ class SLMService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
 
         print "Got update_confirmation()."
         print "  Approved: {}".format(approved)
@@ -226,7 +250,7 @@ class SLMService(rpyc.Service):
     def exposed_download_complete(self, update_image, signature, send_reply, send_error):
         """ function to expose download_complete over RPyC
         """
-        return download_complete(self, update_image, signature, send_reply, send_error)
+        return self.download_complete(update_image, signature, send_reply, send_error)
 
     def download_complete(self,
                           update_image,
@@ -244,7 +268,7 @@ class SLMService(rpyc.Service):
         # doesn't like python dbus-invoked methods to do
         # their own calls (nested calls).
         #
-        send_reply(True)
+        #send_reply(True)
         print "FIXME: Check signature of update image"
 
         #
@@ -272,7 +296,7 @@ class SLMService(rpyc.Service):
     def exposed_operation_result(self, transaction_id, result_code, result_text, send_reply, send_error):
         """ function to expose operation_result over RPyC
         """
-        return operation_result(self, transaction_id, result_code, result_text, send_reply, send_error)
+        return self.operation_result(transaction_id, result_code, result_text, send_reply, send_error)
 
     def operation_result(self,
                          transaction_id,
@@ -310,7 +334,7 @@ class SLMService(rpyc.Service):
     def exposed_get_installed_packages(self, include_packegs, include_module_firmware):
         """ function to expose get_installed_packages over RPyC
         """
-        return get_installed_packages(self, include_packegs, include_module_firmware)
+        return self.get_installed_packages(include_packegs, include_module_firmware)
 
     def get_installed_packages(self, include_packegs, include_module_firmware):
         print "Got get_installed_packages()"
@@ -360,6 +384,11 @@ if reset_db:
         pass
 
 # register service over RPyC
+
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
-t.start()
+print "Starting SWLM rpyc service..."
+t.start() # this blocks until keyboardinterrupt
+print "SWLM rpyc service stopped."
+
+# doesn't reach here util the script ends.

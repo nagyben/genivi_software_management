@@ -8,6 +8,7 @@
 import dbus
 import traceback
 import rpyc
+import time
 
 SWM_RES_OK = 0
 SWM_RES_ALREADY_PROCESSED = 1
@@ -31,22 +32,21 @@ SWM_RES_INTERNAL_ERROR = 18
 SWM_RES_GENERAL_ERROR = 19
 _SWM_RES_FIRST_UNUSED = 20
 
-PORT_SC         = 90001
-PORT_SWLM       = 90002
-PORT_PARTMGR    = 90003
-PORT_PACKMGR    = 90004
-PORT_ECU1       = 90005
-PORT_LCMGR      = 90006
-PORT_HMI        = 90007
+PORT_SC         = 29001
+PORT_SWLM       = 29002
+PORT_PARTMGR    = 29003
+PORT_PACKMGR    = 29004
+PORT_ECU1       = 29005
+PORT_LCMGR      = 29006
+PORT_HMI        = 29007
 
-## === RPYC CONNECTION OBJECTS ====
-sc_rpyc         = rpyc.connect("localhost", PORT_SC)
-swlm_rpyc       = rpyc.connect("localhost", PORT_SWLM)
-partmgr_rpyc    = rpyc.connect("localhost", PORT_PARTMGR)
-packmgr_rpyc    = rpyc.connect("localhost", PORT_PACKMGR)
-ecu1_rpyc       = rpyc.connect("localhost", PORT_ECU1)
-lcmgr_rpyc      = rpyc.connect("localhost", PORT_LCMGR)
-hmi_rpyc        = rpyc.connect("localhost", PORT_HMI)
+sc_rpyc         = 0
+swlm_rpyc       = 0
+partmgr_rpyc    = 0
+packmgr_rpyc    = 0
+ecu1_rpyc       = 0
+lcmgr_rpyc      = 0
+hmi_rpyc        = 0
 
 
 def result(operation_id, code, text):
@@ -85,3 +85,26 @@ def send_operation_result(transaction_id, result_code, result_text):
     swlm_rpyc.root.exposed_operation_result(transaction_id, result_code, result_text)
 
     return None
+
+## we must initialize the rpyc connections but it won't work until all of them are running
+#all_servers_running = False
+#
+#while all_servers_running == False:
+#    try:
+#        print "Attempting to connect to rpyc servers"
+#        sc_rpyc         = rpyc.connect("localhost", PORT_SC)
+#        swlm_rpyc       = rpyc.connect("localhost", PORT_SWLM)
+#        partmgr_rpyc    = rpyc.connect("localhost", PORT_PARTMGR)
+#        packmgr_rpyc    = rpyc.connect("localhost", PORT_PACKMGR)
+#        ecu1_rpyc       = rpyc.connect("localhost", PORT_ECU1)
+#        lcmgr_rpyc      = rpyc.connect("localhost", PORT_LCMGR)
+#        hmi_rpyc        = rpyc.connect("localhost", PORT_HMI)
+#
+#        all_servers_running = True
+#
+#        print "All servers running!"
+#    except Exception:
+#        all_servers_running = False
+#        print "Not all servers are running yet. Waiting 1 second before retrying..."
+#        time.sleep(1)
+#
