@@ -23,14 +23,14 @@ class SLMService(rpyc.Service):
     sc_rpyc = 0
     hmi_rpyc = 0
 
-    def __init__(self, db_path):
-        print "init swlm"
-        #super(SLMService, self).__init__(self._conn)
-        self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
-        # Define our own bus name
-        #bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
-        # Define our own object on the software_loading_manager bus
-        #dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
+    #def __init__(self, db_path):
+    #    print "init swlm"
+    #    #super(SLMService, self).__init__(self._conn)
+    #    self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
+    #    # Define our own bus name
+    #    #bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
+    #    # Define our own object on the software_loading_manager bus
+    #    #dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
 
     def on_connect(self):
         print "A client connected"
@@ -42,11 +42,15 @@ class SLMService(rpyc.Service):
         print "Initializing rpyc connections..."
         try:
             self.sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
+            print "sc_rpyc initialized"
             self.hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
-            print "Rpyc connections initialized."
+            print "hmi_rpyc initialized"
+            self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
+            print "manifest_processor initialized"
+            print "Rpyc connections initialized"
             return True
         except Exception:
-            "Failed to initialize rpyc connections!"
+            print "Failed to initialize rpyc connections!"
             return False
 
 

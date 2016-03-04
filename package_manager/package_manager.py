@@ -37,6 +37,7 @@ class PkgMgrService(rpyc.Service):
         print "A client disconnected"
 
     def exposed_init_rpyc(self):
+        return True
         pass
 
     def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):

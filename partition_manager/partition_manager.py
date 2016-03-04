@@ -20,11 +20,11 @@ import rpyc
 # Partition manager service
 #
 class PartMgrService(rpyc.Service):
-    def __init__(self):
-        super(PartMgrService, self).__init__()
-        #bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
-        pass
+    #def __init__(self):
+    #    super(PartMgrService, self).__init__()
+    #    #bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
+    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
+    #    pass
 
     #@dbus.service.method('org.genivi.partition_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
@@ -36,6 +36,7 @@ class PartMgrService(rpyc.Service):
         print "A client disconnected"
 
     def exposed_init_rpyc(self):
+        return True
         pass
 
     def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):

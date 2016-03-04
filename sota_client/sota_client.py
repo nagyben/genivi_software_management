@@ -15,6 +15,7 @@ import sys
 import time
 import swm
 import traceback
+from threading import Thread
 
 import rpyc
 
@@ -36,9 +37,6 @@ class SOTAClientService(rpyc.Service):
 
         # Define our own bus name
         #bus_name = dbus.service.BusName('org.genivi.sota_client', bus=dbus.SessionBus())
-        # ===
-        # Using RPyC means we register the service outside of the class
-        # ===
 
         # Define our own object on the sota_client bus
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
@@ -46,20 +44,10 @@ class SOTAClientService(rpyc.Service):
     def on_connect(self):
         # code runs when connection is created
         print "Client connected"
-        pass
 
     def on_disconnect(self):
         # code runs when the connection has closed
         print "Client disconnected"
-        pass
-
-    def exposed_get_answer(self):
-        # an exposed method
-        return 42
-
-    def get_question(self):
-        # a method which is not exposed
-        return "This is not exposed"
 
     #@dbus.service.method('org.genivi.sota_client',
     #                     async_callbacks=('send_reply', 'send_error'))
@@ -67,7 +55,7 @@ class SOTAClientService(rpyc.Service):
     def exposed_initiate_download(self, update_id, send_reply, send_error):
         """ function to expose initiate_download to RPyC
         """
-        return initiate_download(self, update_id, send_reply, send_error)
+        return self.initiate_download(update_id, send_reply, send_error)
 
     def initiate_download(self,
                           update_id,
@@ -108,7 +96,7 @@ class SOTAClientService(rpyc.Service):
     def exposed_update_report(self, update_id, results):
         """ function to expose update_report to RPyC
         """
-        return update_report(self, update_id, results)
+        return self.update_report(update_id, results)
 
     def update_report(self,
                       update_id,
@@ -140,6 +128,10 @@ def usage():
     print "                        -s 2889ee...4db0ed22cdb8f4e -c"
     sys.exit(255)
 
+def threaded_start():
+    from rpyc.utils.server import ThreadedServer
+    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
+    t.start()
 
 # === entry point ===
 try:
@@ -192,10 +184,14 @@ try:
 
     #sota_svc = SOTAClientService(image_file, signature)
     # The above is replaced by the below
+    print "Launching SOTA client"
+    thread = Thread(target = threaded_start)
+    thread.start()
 
-    from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
-    t.start()
+    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
+
+    thread.join()
 
     # USE CASE
     #
@@ -221,9 +217,9 @@ try:
     #swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
     #                update_id, description, signature, request_confirmation)
 
-    swm.swlm_rpyc.exposed_update_available(update_id, description, signature, request_confirmation)
 
-    active = True
+
+    #active = True
 
     # Active will be set to false by installation_report()
     #while active:
@@ -233,5 +229,3 @@ try:
 except Exception as e:
     print "Exception: {}".format(e)
     traceback.print_exc()
-
-import conn

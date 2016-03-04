@@ -85,14 +85,14 @@ class DisplayProgress(threading.Thread):
 class HMIService(rpyc.Service):
     swlm_rpyc = 0
 
-    def __init__(self):
-        #super(HMIService, self).__init__()
-        #bus_name = dbus.service.BusName('org.genivi.hmi',
-        #                                bus=dbus.SessionBus())
-        #
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/hmi')
-        self.progress_thread = DisplayProgress()
-        self.progress_thread.start()
+    #def __init__(self):
+    #    #super(HMIService, self).__init__()
+    #    #bus_name = dbus.service.BusName('org.genivi.hmi',
+    #    #                                bus=dbus.SessionBus())
+    #    #
+    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/hmi')
+    #    self.progress_thread = DisplayProgress()
+    #    self.progress_thread.start()
 
     def on_connect(self):
         print "A client connected"
@@ -101,8 +101,16 @@ class HMIService(rpyc.Service):
         print "A client disconnected"
 
     def exposed_init_rpyc(self):
-        self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-
+        try:
+            print "Initializing rpyc connections..."
+            self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+            print "swlm_rpyc initialized!"
+            self.progress_thread = DisplayProgress()
+            self.progress_thread.start()
+            return True
+        except Exception:
+            print "Could not initialize rpyc services!"
+            return False
 
     #@dbus.service.method('org.genivi.hmi',
     #                     async_callbacks=('send_reply', 'send_error'))

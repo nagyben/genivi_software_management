@@ -20,11 +20,11 @@ import rpyc
 # ECU Module Loader service
 #
 class ECU1ModuleLoaderService(rpyc.Service):
-    def __init__(self):
-        #super(ECU1ModuleLoaderService, self).__init__()
-        #bus_name = dbus.service.BusName('org.genivi.module_loader_ecu1', bus=dbus.SessionBus())
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/module_loader_ecu1')
-        pass
+    #def __init__(self):
+    #    #super(ECU1ModuleLoaderService, self).__init__()
+    #    #bus_name = dbus.service.BusName('org.genivi.module_loader_ecu1', bus=dbus.SessionBus())
+    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/module_loader_ecu1')
+    #    pass
 
     #@dbus.service.method('org.genivi.module_loader_ecu1',
     #                     async_callbacks=('send_reply', 'send_error'))
@@ -36,6 +36,7 @@ class ECU1ModuleLoaderService(rpyc.Service):
         print "A client disconnected"
 
     def exposed_init_rpyc(self):
+        return True
         pass
 
     def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error):

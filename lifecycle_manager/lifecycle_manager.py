@@ -20,11 +20,11 @@ import rpyc
 # Lifecycle manager service
 #
 class LCMgrService(rpyc.Service):
-    def __init__(self):
-        #super(LCMgrService, self).__init__()
-        #bus_name = dbus.service.BusName('org.genivi.lifecycle_manager', dbus.SessionBus())
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/lifecycle_manager')
-        pass
+    #def __init__(self):
+    #    #super(LCMgrService, self).__init__()
+    #    #bus_name = dbus.service.BusName('org.genivi.lifecycle_manager', dbus.SessionBus())
+    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/lifecycle_manager')
+    #    pass
 
     #@dbus.service.method('org.genivi.lifecycle_manager',
     #                     async_callbacks=('send_reply', 'send_error'))
@@ -36,6 +36,7 @@ class LCMgrService(rpyc.Service):
         print "A client disconnected"
 
     def exposed_init_rpyc(self):
+        return True
         pass
 
     def exposed_start_components(self, transaction_id, components, send_reply, send_error):
