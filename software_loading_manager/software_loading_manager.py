@@ -350,7 +350,7 @@ SLM = SoftwareLoadingManager(db_path)
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
-print "Starting SWLM rpyc service..."
+print "Starting SWLM ThreadedServer on port " + str(swm.PORT_SWLM)
 t.start() # this blocks until keyboardinterrupt
 print "SWLM rpyc service stopped."
 
