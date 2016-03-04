@@ -19,32 +19,8 @@ import rpyc
 #
 # Package manager service
 #
-class PkgMgrService(rpyc.Service):
-    #def __init__(self):
-    #    print "init package manager"
-    #    #super(PkgMgrService, self).__init__(self._conn)
-    #    #bus_name = dbus.service.BusName('org.genivi.package_manager', bus=dbus.SessionBus())
-    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/package_manager')
-    #    pass
 
-    #@dbus.service.method('org.genivi.package_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        return True
-        pass
-
-    def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):
-        """ function to expose install_pacakge over rpyc
-        """
-        return self.install_package(transaction_id, image_path, blacklisted_packages, send_reply, send_error)
-
+class PackageManager(object):
     def install_package(self,
                         transaction_id,
                         image_path,
@@ -85,15 +61,6 @@ class PkgMgrService(rpyc.Service):
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
         return None
-
-
-    #@dbus.service.method('org.genivi.package_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error):
-        """ function to expose upgrade_package over rpyc
-        """
-        return self.upgrade_package(transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
 
     def upgrade_package(self,
                         transaction_id,
@@ -139,14 +106,6 @@ class PkgMgrService(rpyc.Service):
                                       "Internal_error: {}".format(e))
         return None
 
-    #@dbus.service.method('org.genivi.package_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_remove_package(self, transaction_id, package_id, send_reply, send_error):
-        """ function to expose remove_package over rpyc
-        """
-        return self.remove_package(transaction_id, package_id, send_reply, send_error)
-
     def remove_package(self,
                        transaction_id,
                        package_id,
@@ -184,32 +143,49 @@ class PkgMgrService(rpyc.Service):
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
         return None
-        return None
-
-    #@dbus.service.method('org.genivi.package_manager')
-
-    def exposed_get_installed_packages(self):
-        """ function to expose get_installed_packages over rpyc
-        """
-        return self.get_installed_packages()
 
     def get_installed_packages(self):
         print "Got get_installed_packages()"
         return [ 'bluez_driver_1.2.2', 'bluez_apps_2.4.4' ]
 
 
+class PkgMgrService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):
+        """ function to expose install_pacakge over rpyc
+        """
+        return PackMgr.install_package(transaction_id, image_path, blacklisted_packages, send_reply, send_error)
+
+    def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error):
+        """ function to expose upgrade_package over rpyc
+        """
+        return PackMgr.upgrade_package(transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
+
+    def exposed_remove_package(self, transaction_id, package_id, send_reply, send_error):
+        """ function to expose remove_package over rpyc
+        """
+        return PackMgr.remove_package(transaction_id, package_id, send_reply, send_error)
+
+    def exposed_get_installed_packages(self):
+        """ function to expose get_installed_packages over rpyc
+        """
+        return PackMgr.get_installed_packages()
 
 print
 print "Package Manager."
 print
 
+print "Initializing PackageManager..."
+PackMgr = PackageManager()
 
-#DBusGMainLoop(set_as_default=True)
-#pkg_mgr = PkgMgrService()
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PkgMgrService, port = swm.PORT_PACKMGR)
-
-print "Starting Package Manager rpyc service on port " + str(swm.PORT_PACKMGR)
+print "Starting PackageManager ThreadedServer service on port " + str(swm.PORT_PACKMGR)
 t.start()
 
 #while True:
