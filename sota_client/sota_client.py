@@ -111,6 +111,12 @@ def usage():
     print "                        -s 2889ee...4db0ed22cdb8f4e -c"
     sys.exit(255)
 
+def threaded_start():
+    from rpyc.utils.server import ThreadedServer
+    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
+    print "Launching SOTA Client ThreadedServer on port " + str(swm.PORT_SC)
+    t.start()
+
 # === entry point ===
 try:
     opts, args= getopt.getopt(sys.argv[1:], "u:d:i:s:c")
@@ -165,10 +171,13 @@ try:
     print "Initializing SOTA Client"
     SC = SOTAClient(image_file, signature)
 
-    from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
-    print "Launching SOTA Client ThreadedServer on port " + str(swm.PORT_SC)
-    t.start()
+    thread = Thread(target = threaded_start)
+    thread.start()
+
+    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation, 0, 0)
+
+    thread.join()
 
     # USE CASE
     #
