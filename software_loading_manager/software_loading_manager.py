@@ -19,45 +19,10 @@ import rpyc
 #
 # Define the DBUS-facing Software Loading Manager service
 #
-class SLMService(rpyc.Service):
-    #sc_rpyc = 0
-    #hmi_rpyc = 0
 
-    #def __init__(self, db_path):
-    #    print "init swlm"
-    #    #super(SLMService, self).__init__(self._conn)
-    #    self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
-    #    # Define our own bus name
-    #    #bus_name = dbus.service.BusName('org.genivi.software_loading_manager', bus=dbus.SessionBus())
-    #    # Define our own object on the software_loading_manager bus
-    #    #dbus.service.Object.__init__(self, bus_name, "/org/genivi/software_loading_manager")
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        print "Initializing rpyc connections..."
-        try:
-            self.sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
-            print "sc_rpyc initialized"
-            self.hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
-            print "hmi_rpyc initialized"
-            self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
-            print "manifest_processor initialized"
-            print "Rpyc connections initialized"
-            return True
-        except Exception:
-            print "Failed to initialize rpyc connections!"
-            return False
-
-
-    def exposed_initiate_download(self, package_id):
-        """ function to expose update_report to RPyC
-        """
-        return self.initiate_download(package_id)
+class SoftwareLoadingManager(object):
+    def __init__(self, db_path):
+        self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
 
     def initiate_download(self, package_id):
         #swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
@@ -111,7 +76,8 @@ class SLMService(rpyc.Service):
     def inform_hmi_of_new_operation(self,op):
         #swm.dbus_method("org.genivi.hmi", "operation_started",
         #                op.operation_id, op.time_estimate, op.description)
-        self.hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
+        hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+        hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
         return None
 
     def inform_hmi_of_new_manifest(self,manifest):
@@ -121,7 +87,8 @@ class SLMService(rpyc.Service):
 
         #swm.dbus_method("org.genivi.hmi", "manifest_started",
         #                manifest.update_id, total_time, manifest.description)
-        self.hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
+        hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+        hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
         return None
 
     def start_next_operation(self):
@@ -144,7 +111,6 @@ class SLMService(rpyc.Service):
         if  manifest.active_operation:
             return True
 
-
         # We have an active manifest, but no active operation.
         # Try to start the next operation.
         # If that fails, we are out of operations in the current
@@ -156,14 +122,6 @@ class SLMService(rpyc.Service):
         # Inform HMI of active operation
         self.inform_hmi_of_new_operation(manifest.active_operation)
         return True
-
-    #@dbus.service.method("org.genivi.software_loading_manager",
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error):
-        """ function to expose update_available over RPyC
-        """
-        return self.update_available(update_id, description, signature, request_confirmation, send_reply, send_error)
 
     def update_available(self,
                          update_id,
@@ -178,12 +136,6 @@ class SLMService(rpyc.Service):
         print "  descr:   {}".format(description)
         print "  confirm: {}".format(request_confirmation)
 
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         #
         # Send a notification to the HMI to get user approval / decline
         # Once user has responded, HMI will invoke self.package_confirmation()
@@ -191,7 +143,8 @@ class SLMService(rpyc.Service):
         #
         if request_confirmation:
             #swm.dbus_method("org.genivi.hmi", "update_notification", update_id, description)
-            self.hmi_rpyc.root.update_notification(update_id, description)
+            hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+            hmi_rpyc.root.update_notification(update_id, description)
 
             print "  Called hmi.update_notification()"
             print "---"
@@ -202,27 +155,11 @@ class SLMService(rpyc.Service):
         self.initiate_download(update_id)
         return None
 
-    #@dbus.service.method("org.genivi.software_loading_manager",
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_update_confirmation(self, update_id, approved, send_reply, send_error):
-        """ function to expose update_confirmation over RPyC
-        """
-        return self.update_confirmation( update_id, approved, send_reply, send_error)
-
     def update_confirmation(self,
                             update_id,
                             approved,
                             send_reply,
                             send_error):
-
-
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
 
         print "Got update_confirmation()."
         print "  Approved: {}".format(approved)
@@ -251,14 +188,6 @@ class SLMService(rpyc.Service):
             print "---"
 
         return None
-
-    #@dbus.service.method("org.genivi.software_loading_manager",
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_download_complete(self, update_image, signature, send_reply, send_error):
-        """ function to expose download_complete over RPyC
-        """
-        return self.download_complete(update_image, signature, send_reply, send_error)
 
     def download_complete(self,
                           update_image,
@@ -297,15 +226,6 @@ class SLMService(rpyc.Service):
     # once they have completed their process_update() calls invoked
     # by software_loading_manager
     #
-
-    #@dbus.service.method("org.genivi.software_loading_manager",
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_operation_result(self, transaction_id, result_code, result_text, send_reply, send_error):
-        """ function to expose operation_result over RPyC
-        """
-        return self.operation_result(transaction_id, result_code, result_text, send_reply, send_error)
-
     def operation_result(self,
                          transaction_id,
                          result_code,
@@ -337,16 +257,48 @@ class SLMService(rpyc.Service):
             print "Failed to process operation result: {}".format(e)
             traceback.print_exc()
 
-    #@dbus.service.method("org.genivi.software_loading_manager")
+    def get_installed_packages(self, include_packegs, include_module_firmware):
+        print "Got get_installed_packages()"
+        return [ "bluez_driver", "bluez_apps" ]
+
+
+class SLMService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_initiate_download(self, package_id):
+        """ function to expose update_report to RPyC
+        """
+        return SLM.initiate_download(package_id)
+
+    def exposed_update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error):
+        """ function to expose update_available over RPyC
+        """
+        return SLM.update_available(update_id, description, signature, request_confirmation, send_reply, send_error)
+
+    def exposed_update_confirmation(self, update_id, approved, send_reply, send_error):
+        """ function to expose update_confirmation over RPyC
+        """
+        return SLM.update_confirmation( update_id, approved, send_reply, send_error)
+
+    def exposed_download_complete(self, update_image, signature, send_reply, send_error):
+        """ function to expose download_complete over RPyC
+        """
+        return SLM.download_complete(update_image, signature, send_reply, send_error)
+
+    def exposed_operation_result(self, transaction_id, result_code, result_text, send_reply, send_error):
+        """ function to expose operation_result over RPyC
+        """
+        return SLM.operation_result(transaction_id, result_code, result_text, send_reply, send_error)
 
     def exposed_get_installed_packages(self, include_packegs, include_module_firmware):
         """ function to expose get_installed_packages over RPyC
         """
-        return self.get_installed_packages(include_packegs, include_module_firmware)
+        return SLM.get_installed_packages(include_packegs, include_module_firmware)
 
-    def get_installed_packages(self, include_packegs, include_module_firmware):
-        print "Got get_installed_packages()"
-        return [ "bluez_driver", "bluez_apps" ]
 
 def usage():
     print "Usage:", sys.argv[0], "[-r] [-d database_file] "
@@ -392,6 +344,9 @@ if reset_db:
         pass
 
 # register service over RPyC
+
+print "Initializing SoftwareLoadingManager..."
+SLM = SoftwareLoadingManager(db_path)
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
