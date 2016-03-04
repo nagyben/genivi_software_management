@@ -19,31 +19,8 @@ import rpyc
 #
 # Partition manager service
 #
-class PartMgrService(rpyc.Service):
-    #def __init__(self):
-    #    super(PartMgrService, self).__init__()
-    #    #bus_name = dbus.service.BusName('org.genivi.partition_manager', bus=dbus.SessionBus())
-    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/partition_manager')
-    #    pass
 
-    #@dbus.service.method('org.genivi.partition_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        return True
-        pass
-
-    def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
-        """ function to expose create_disk_partition over RPyC
-        """
-        return self.create_disk_partition(transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
-
+class PartitionManager(object):
     def create_disk_partition(self,
                               transaction_id,
                               disk,
@@ -67,13 +44,6 @@ class PartMgrService(rpyc.Service):
         print "  Name:                      {}".format(name)
         print "---"
 
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate install
         print "Create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number)
         for i in xrange(1,30):
@@ -87,14 +57,6 @@ class PartMgrService(rpyc.Service):
                                   "Partition create successful. Disk: {}:{}".format(disk, partition_number))
 
         return None
-
-    #@dbus.service.method('org.genivi.partition_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error):
-        """ function to expose resize_disk_partition over RPyC
-        """
-        return self.resize_disk_partition(transaction_id, disk, partition_number, start, size, send_reply, send_error)
 
     def resize_disk_partition(self,
                               transaction_id,
@@ -113,13 +75,6 @@ class PartMgrService(rpyc.Service):
         print "  Size:                      {}".format(size)
         print "---"
 
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate install
         print "Resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
@@ -132,14 +87,6 @@ class PartMgrService(rpyc.Service):
                                    swm.SWM_RES_OK,
                                    "Partition resize success. Disk: {}:{}".format(disk, partition_number))
         return None
-
-    #@dbus.service.method('org.genivi.partition_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_delete_disk_partition(self, transaction_id, disk, partition_number, send_reply, send_error):
-        """ function to expose delete_disk_partition over rpyc
-        """
-        return self.delete_disk_partition(transaction_id, disk, partition_number, send_reply, send_error)
 
     def delete_disk_partition(self,
                               transaction_id,
@@ -154,13 +101,6 @@ class PartMgrService(rpyc.Service):
         print "  Partition Number:          {}".format(partition_number)
         print "---"
 
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate install
         print "Delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number)
         for i in xrange(1,10):
@@ -174,14 +114,6 @@ class PartMgrService(rpyc.Service):
                                    "Partition delete success. Disk: {}:{}".format(disk, partition_number))
 
         return None
-
-    #@dbus.service.method('org.genivi.partition_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
-        """ function to expose write_disk_partition over rpyc
-        """
-        return self.write_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
 
     def write_disk_partition(self,
                              transaction_id,
@@ -200,13 +132,6 @@ class PartMgrService(rpyc.Service):
         print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
         print "---"
 
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate write
         print "Writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
@@ -221,14 +146,6 @@ class PartMgrService(rpyc.Service):
                                   format(disk, partition_number, image_path))
 
         return None
-
-    #@dbus.service.method('org.genivi.partition_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
-        """ function to expose patch_disk_partition over rpyc
-        """
-        return self.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
 
     def patch_disk_partition(self,
                              transaction_id,
@@ -247,13 +164,6 @@ class PartMgrService(rpyc.Service):
         print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
         print "---"
 
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate patch
         print "Patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
@@ -269,13 +179,53 @@ class PartMgrService(rpyc.Service):
         return None
 
 
+
+class PartMgrService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_init_rpyc(self):
+        return True
+        pass
+
+    def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
+        """ function to expose create_disk_partition over RPyC
+        """
+        return PartMgr.create_disk_partition(transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
+
+    def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error):
+        """ function to expose resize_disk_partition over RPyC
+        """
+        return PartMgr.resize_disk_partition(transaction_id, disk, partition_number, start, size, send_reply, send_error)
+
+    def exposed_delete_disk_partition(self, transaction_id, disk, partition_number, send_reply, send_error):
+        """ function to expose delete_disk_partition over rpyc
+        """
+        return PartMgr.delete_disk_partition(transaction_id, disk, partition_number, send_reply, send_error)
+
+    def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+        """ function to expose write_disk_partition over rpyc
+        """
+        return PartMgr.write_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+
+    def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+        """ function to expose patch_disk_partition over rpyc
+        """
+        return PartMgr.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+
 print
 print "Partition Manager."
 print
-#DBusGMainLoop(set_as_default=True)
-#part_mgr = PartMgrService()
+
+print "Initializing PartitionManager..."
+PartMgr = PartitionManager()
+
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PartMgrService, port = swm.PORT_PARTMGR)
+print "Starting PartitionManager ThreadedServer on port " + str(swm.PORT_PARTMGR)
 t.start()
 
 #while True:
