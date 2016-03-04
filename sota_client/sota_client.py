@@ -27,19 +27,30 @@ update_file=''
 active=True
 class SOTAClientService(rpyc.Service):
 
-    def __init__(self, image_file, signature):
-
-        # Store where we have the image file
-        self.image_file = image_file
-
-        # Store signature
-        self.signature = signature
+    #def __init__(self, image_file, signature):
+    #
+    #    # Store where we have the image file
+    #    self.image_file = image_file
+    #
+    #    # Store signature
+    #    self.signature = signature
 
         # Define our own bus name
         #bus_name = dbus.service.BusName('org.genivi.sota_client', bus=dbus.SessionBus())
 
         # Define our own object on the sota_client bus
         #dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
+
+    def exposed_init_rpyc(self):
+        print "Initializing rpyc connections..."
+        try:
+            self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+            print "swlm_rpyc initialized"
+            print "Rpyc connections initialized"
+            return True
+        except Exception:
+            print "Failed to initialize rpyc connections!"
+            return False
 
     def on_connect(self):
         # code runs when connection is created
@@ -87,7 +98,7 @@ class SOTAClientService(rpyc.Service):
         print "Done."
 
         #swm.dbus_method('org.genivi.software_loading_manager', 'download_complete', self.image_file, self.signature)
-
+        self.swlm_rpyc.root.download_complete(image_file, signature)
 
         return None
 
@@ -131,6 +142,7 @@ def usage():
 def threaded_start():
     from rpyc.utils.server import ThreadedServer
     t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
+    print "Starting SOTAClientService on port " + str(swm.PORT_SC)
     t.start()
 
 # === entry point ===
@@ -188,8 +200,10 @@ try:
     thread = Thread(target = threaded_start)
     thread.start()
 
+    raw_input("Press enter once initializer.py has run successfully")
+
     swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
+    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation, 0, 0)
 
     thread.join()
 

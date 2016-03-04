@@ -20,8 +20,8 @@ import rpyc
 # Define the DBUS-facing Software Loading Manager service
 #
 class SLMService(rpyc.Service):
-    sc_rpyc = 0
-    hmi_rpyc = 0
+    #sc_rpyc = 0
+    #hmi_rpyc = 0
 
     #def __init__(self, db_path):
     #    print "init swlm"
@@ -61,7 +61,8 @@ class SLMService(rpyc.Service):
 
     def initiate_download(self, package_id):
         #swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
-        self.sc_rpyc.root.initiate_download(package_id)
+        sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
+        sc_rpyc.root.initiate_download(package_id)
 
     #
     # Distribute a report of a completed installation
@@ -74,12 +75,15 @@ class SLMService(rpyc.Service):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
         #swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
-        self.hmi_rpyc.root.update_report(update_id, results)
+        #self.hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+        hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
+        hmi_rpyc.root.update_report(update_id, results)
 
         # Send installation report to SOTA
         print "Sending report to sota.update_report()"
         #swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
-        self.sc_rpyc.root.update_report(update_id, results)
+        sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
+        sc_rpyc.root.update_report(update_id, results)
 
     def get_current_manifest(self):
         return self.manifest_processor.current_manifest

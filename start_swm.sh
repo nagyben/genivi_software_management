@@ -47,17 +47,24 @@ done
 
 export PYTHONPATH="${PWD}/common/"
 rm -f $PID_FNAME
-gnome-terminal --geometry 80x15+0+0 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Package Manager\007\"; cd package_manager;python package_manager.py" &
+#gnome-terminal --geometry 80x15+0+0 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Package Manager\007\"; cd package_manager;python package_manager.py" &
+#
+#gnome-terminal --geometry 80x15+0+500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Partition Manager\007\";cd partition_manager; python partition_manager.py" &
+#
+#gnome-terminal --geometry 80x15+0+1000 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;ECU1 Module Loader\007\"; cd module_loader_ecu1; python module_loader_ecu1.py" &
+#
+#gnome-terminal --geometry 80x24+0+1500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Software Loading Manager\007\";cd software_loading_manager; python software_loading_manager.py ${SWLM_ARG}" &
+#
+#gnome-terminal --geometry 80x15+0+2000  -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Lifecycle Manager\007\";cd lifecycle_manager; python lifecycle_manager.py" &
+#
+#gnome-terminal --geometry 80x20+0+2500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;HMI\007\";cd hmi;python hmi.py" &
 
-gnome-terminal --geometry 80x15+0+500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Partition Manager\007\";cd partition_manager; python partition_manager.py" &
-
-gnome-terminal --geometry 80x15+0+1000 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;ECU1 Module Loader\007\"; cd module_loader_ecu1; python module_loader_ecu1.py" &
-
-gnome-terminal --geometry 80x24+0+1500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Software Loading Manager\007\";cd software_loading_manager; python software_loading_manager.py ${SWLM_ARG}" &
-
-gnome-terminal --geometry 80x15+0+2000  -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;Lifecycle Manager\007\";cd lifecycle_manager; python lifecycle_manager.py" &
-
-gnome-terminal --geometry 80x20+0+2500 -x bash -c "echo \$BASHPID >> $PID_FNAME; echo -ne \"\033]0;HMI\007\";cd hmi;python hmi.py" &
+gnome-terminal --geometry 60x15+0+0 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Package Manager\007\";python package_manager/package_manager.py; read x" &
+gnome-terminal --geometry 60x15+0+400 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Partition Manager\007\"; python partition_manager/partition_manager.py; read x" &
+gnome-terminal --geometry 60x15+0+800 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Module Loader ECU1\007\"; python module_loader_ecu1/module_loader_ecu1.py; read x" &
+gnome-terminal --geometry 60x15+630+0 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Software Loading Manager\007\"; python software_loading_manager/software_loading_manager.py; read x" &
+gnome-terminal --geometry 60x15+630+400 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Lifecycle Manager\007\"; python lifecycle_manager/lifecycle_manager.py; read x" &
+gnome-terminal --geometry 60x15+630+800 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;HMI\007\"; python hmi/hmi.py; read x" &
 
 trap killswm INT
 
@@ -80,7 +87,7 @@ echo "to start package use case."
 echo
 echo "Press Enter shut down Software Manager"
 
-
+gnome-terminal --geometry 60x15+1200+400 -x bash -c "echo \$BASHPID >> $PIDFILE; echo -ne \"\033]0;Initializer\007\"; python initializer.py; read x" &
 
 read x
 killswm
