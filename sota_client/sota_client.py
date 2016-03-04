@@ -25,48 +25,14 @@ description='Media Player Update'
 signature='d2889ee6bc1fe1f3d7c5cdaca78384776bf437b7c6ca4db0e2c8b1d22cdb8f4e'
 update_file=''
 active=True
-class SOTAClientService(rpyc.Service):
 
-    #def __init__(self, image_file, signature):
-    #
-    #    # Store where we have the image file
-    #    self.image_file = image_file
-    #
-    #    # Store signature
-    #    self.signature = signature
+class SOTAClient(object):
+    def __init__(self, image_file, signature):
+        # Store where we have the image file
+        self.image_file = image_file
 
-        # Define our own bus name
-        #bus_name = dbus.service.BusName('org.genivi.sota_client', bus=dbus.SessionBus())
-
-        # Define our own object on the sota_client bus
-        #dbus.service.Object.__init__(self, bus_name, '/org/genivi/sota_client')
-
-    def exposed_init_rpyc(self):
-        print "Initializing rpyc connections..."
-        try:
-            self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-            print "swlm_rpyc initialized"
-            print "Rpyc connections initialized"
-            return True
-        except Exception:
-            print "Failed to initialize rpyc connections!"
-            return False
-
-    def on_connect(self):
-        # code runs when connection is created
-        print "Client connected"
-
-    def on_disconnect(self):
-        # code runs when the connection has closed
-        print "Client disconnected"
-
-    #@dbus.service.method('org.genivi.sota_client',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_initiate_download(self, update_id, send_reply, send_error):
-        """ function to expose initiate_download to RPyC
-        """
-        return self.initiate_download(update_id, send_reply, send_error)
+        # Store signature
+        self.signature = signature
 
     def initiate_download(self,
                           update_id,
@@ -82,12 +48,6 @@ class SOTAClientService(rpyc.Service):
         print "  ID:     {}".format(update_id)
         print "---"
 
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         #  Simulate download
         print "Downloading"
         for i in xrange(1,10):
@@ -97,17 +57,10 @@ class SOTAClientService(rpyc.Service):
         print
         print "Done."
 
-        #swm.dbus_method('org.genivi.software_loading_manager', 'download_complete', self.image_file, self.signature)
-        self.swlm_rpyc.root.download_complete(image_file, signature)
+        swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+        swlm_rpyc.root.download_complete(image_file, signature)
 
         return None
-
-    #@dbus.service.method('org.genivi.sota_client')
-
-    def exposed_update_report(self, update_id, results):
-        """ function to expose update_report to RPyC
-        """
-        return self.update_report(update_id, results)
 
     def update_report(self,
                       update_id,
@@ -124,6 +77,25 @@ class SOTAClientService(rpyc.Service):
         active = False
         return None
 
+class SOTAClientService(rpyc.Service):
+    def on_connect(self):
+        # code runs when connection is created
+        print "Client connected"
+
+    def on_disconnect(self):
+        # code runs when the connection has closed
+        print "Client disconnected"
+
+    def exposed_initiate_download(self, update_id, send_reply, send_error):
+        """ function to expose initiate_download to RPyC
+        """
+        return SC.initiate_download(update_id, send_reply, send_error)
+
+    def exposed_update_report(self, update_id, results):
+        """ function to expose update_report to RPyC
+        """
+        return SC.update_report(update_id, results)
+
 def usage():
     print "Usage:", sys.argv[0], "-u update_id -i image_file -d description \\"
     print "                       -s signature [-c]"
@@ -138,12 +110,6 @@ def usage():
     print "                        -i boot_loader.img  \\"
     print "                        -s 2889ee...4db0ed22cdb8f4e -c"
     sys.exit(255)
-
-def threaded_start():
-    from rpyc.utils.server import ThreadedServer
-    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
-    print "Starting SOTAClientService on port " + str(swm.PORT_SC)
-    t.start()
 
 # === entry point ===
 try:
@@ -195,17 +161,14 @@ try:
     #DBusGMainLoop(set_as_default=True)
 
     #sota_svc = SOTAClientService(image_file, signature)
-    # The above is replaced by the below
-    print "Launching SOTA client"
-    thread = Thread(target = threaded_start)
-    thread.start()
 
-    raw_input("Press enter once initializer.py has run successfully")
+    print "Initializing SOTA Client"
+    SC = SOTAClient(image_file, signature)
 
-    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation, 0, 0)
-
-    thread.join()
+    from rpyc.utils.server import ThreadedServer
+    t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
+    print "Launching SOTA Client ThreadedServer on port " + str(swm.PORT_SC)
+    t.start()
 
     # USE CASE
     #
