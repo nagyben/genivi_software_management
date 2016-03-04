@@ -58,7 +58,7 @@ class SOTAClient(object):
         print "Done."
 
         swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-        swlm_rpyc.root.download_complete(image_file, signature)
+        swlm_rpyc.root.download_complete(self.image_file, self.signature)
 
         return None
 
