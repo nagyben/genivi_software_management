@@ -187,10 +187,6 @@ class PartMgrService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_init_rpyc(self):
-        return True
-        pass
-
     def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
         """ function to expose create_disk_partition over RPyC
         """
