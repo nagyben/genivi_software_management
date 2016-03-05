@@ -19,31 +19,8 @@ import rpyc
 #
 # Lifecycle manager service
 #
-class LCMgrService(rpyc.Service):
-    #def __init__(self):
-    #    #super(LCMgrService, self).__init__()
-    #    #bus_name = dbus.service.BusName('org.genivi.lifecycle_manager', dbus.SessionBus())
-    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/lifecycle_manager')
-    #    pass
 
-    #@dbus.service.method('org.genivi.lifecycle_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        return True
-        pass
-
-    def exposed_start_components(self, transaction_id, components, send_reply, send_error):
-        """ function to expose start_components over RPyC
-        """
-        return self.start_components(transaction_id, components, send_reply, send_error)
-
+class LifecycleManager(object):
     def start_components(self,
                          transaction_id,
                          components,
@@ -54,13 +31,6 @@ class LCMgrService(rpyc.Service):
         print "  Operation Transaction ID: {}".format(transaction_id)
         print "  Components:               {}".format(", ".join(components))
         print "---"
-
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
 
         # Simulate install
         print "Starting :"
@@ -74,15 +44,6 @@ class LCMgrService(rpyc.Service):
                                   "Started components {}".format(", ".join(components)))
         return None
 
-
-    #@dbus.service.method('org.genivi.lifecycle_manager',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_stop_components(self, transaction_id, components, send_reply, send_error):
-        """ function to expose stop_components over RPyC
-        """
-        return self.stop_components(transaction_id, components, send_reply, send_error)
-
     def stop_components(self,
                         transaction_id,
                         components,
@@ -93,13 +54,6 @@ class LCMgrService(rpyc.Service):
         print "  Operation Transaction ID: {}".format(transaction_id)
         print "  Components:               {}".format(", ".join(components))
         print "---"
-
-        #
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
 
         # Simulate install
         print "Stopping :"
@@ -114,19 +68,32 @@ class LCMgrService(rpyc.Service):
 
         return None
 
+class LCMgrService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_start_components(self, transaction_id, components, send_reply, send_error):
+        """ function to expose start_components over RPyC
+        """
+        return LCMgr.start_components(transaction_id, components, send_reply, send_error)
+
+    def exposed_stop_components(self, transaction_id, components, send_reply, send_error):
+        """ function to expose stop_components over RPyC
+        """
+        return LCMgr.stop_components(transaction_id, components, send_reply, send_error)
 
 
 print
 print "Lifecycle Manager."
 print
 
+print "Initializing LifecycleManager..."
+LCMgr = LifecycleManager()
 
-#DBusGMainLoop(set_as_default=True)
-#pkg_mgr = LCMgrService()
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(LCMgrService, port = swm.PORT_LCMGR)
+print "Starting LCMgrService ThreadServer on port " +  str(swm.PORT_LCMGR)
 t.start()
-
-
-#while True:
-#    gtk.main_iteration()
