@@ -82,43 +82,11 @@ class DisplayProgress(threading.Thread):
 #
 # Human Machine Interface Service
 #
-class HMIService(rpyc.Service):
-    swlm_rpyc = 0
 
-    #def __init__(self):
-    #    #super(HMIService, self).__init__()
-    #    #bus_name = dbus.service.BusName('org.genivi.hmi',
-    #    #                                bus=dbus.SessionBus())
-    #    #
-    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/hmi')
-    #    self.progress_thread = DisplayProgress()
-    #    self.progress_thread.start()
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        try:
-            print "Initializing rpyc connections..."
-            self.swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-            print "swlm_rpyc initialized!"
-            self.progress_thread = DisplayProgress()
-            self.progress_thread.start()
-            return True
-        except Exception:
-            print "Could not initialize rpyc services!"
-            return False
-
-    #@dbus.service.method('org.genivi.hmi',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_update_notification(self, update_id, description, send_reply, send_error):
-        """ function to expose update_notification over rpyc
-        """
-        return self.update_notification(update_id, description, send_reply, send_error)
+class HMI(object):
+    def __init__(self):
+        self.progress_thread = DisplayProgress()
+        self.progress_thread.start()
 
     def update_notification(self,
                             update_id,
@@ -131,13 +99,6 @@ class HMIService(rpyc.Service):
             print "  ID:            {}".format(update_id)
             print "  description:   {}".format(description)
             print "---"
-
-            #
-            # Send back an async reply to the invoking software_loading_manager
-            # so that we can continue with user interaction without
-            # risking a DBUS timeout
-            #
-            #send_reply(True)
 
             print
             print
@@ -166,23 +127,14 @@ class HMIService(rpyc.Service):
             # Call software_loading_manager.package_confirmation()
             # to inform it of user approval / decline.
             #
-            #swm.dbus_method('org.genivi.software_loading_manager','update_confirmation', update_id, approved)
-            self.swlm_rpyc.root.update_confirmation(update_id, approved)
+            swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+            swlm_rpyc.root.update_confirmation(update_id, approved)
 
         except Exception as e:
             print "Exception: {}".format(e)
             traceback.print_exc()
 
         return None
-
-
-    #@dbus.service.method('org.genivi.hmi',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_manifest_started(self, update_id, total_time_estimate, description, send_reply, send_error):
-        """ function to expose manifest_started over rpyc
-        """
-        return self.manifest_started(update_id, total_time_estimate, description, send_reply, send_error)
 
     def manifest_started(self,
                          update_id,
@@ -205,15 +157,6 @@ class HMIService(rpyc.Service):
 
         return None
 
-
-    #@dbus.service.method('org.genivi.hmi',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_operation_started(self, operation_id, time_estimate, description, send_reply, send_error):
-        """ function to expose operation_started over rpyc
-        """
-        return self.operation_started(operation_id, time_estimate, description, send_reply, send_error)
-
     def operation_started(self,
                           operation_id,
                           time_estimate,
@@ -230,14 +173,6 @@ class HMIService(rpyc.Service):
             print "Exception: {}".format(e)
             traceback.print_exc()
         return None
-
-    #@dbus.service.method('org.genivi.hmi',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def exposed_update_report(self, update_id, results, send_reply, send_error):
-        """ function to expose update_report over rpyc
-        """
-        return self.update_report(update_id, results, send_reply, send_error)
 
     def update_report(self,
                       update_id,
@@ -261,18 +196,45 @@ class HMIService(rpyc.Service):
             traceback.print_exc()
         return None
 
+
+class HMIService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_update_notification(self, update_id, description, send_reply, send_error):
+        """ function to expose update_notification over rpyc
+        """
+        return hmi.update_notification(update_id, description, send_reply, send_error)
+
+    def exposed_manifest_started(self, update_id, total_time_estimate, description, send_reply, send_error):
+        """ function to expose manifest_started over rpyc
+        """
+        return hmi.manifest_started(update_id, total_time_estimate, description, send_reply, send_error)
+
+    def exposed_operation_started(self, operation_id, time_estimate, description, send_reply, send_error):
+        """ function to expose operation_started over rpyc
+        """
+        return hmi.operation_started(operation_id, time_estimate, description, send_reply, send_error)
+
+    def exposed_update_report(self, update_id, results, send_reply, send_error):
+        """ function to expose update_report over rpyc
+        """
+        return hmi.update_report(update_id, results, send_reply, send_error)
+
 print
 print "HMI Simulator"
 print "Please enter package installation approval when prompted"
 print
 
-
 #gtk.gdk.threads_init() TODO: will this break the threads?
-#DBusGMainLoop(set_as_default=True)
-#pkg_mgr = HMIService()
+
+print "Initializing HMI..."
+hmi = HMI()
+
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(HMIService, port = swm.PORT_HMI)
+print "Starting HMIService ThreadServer on port " + str(swm.PORT_HMI)
 t.start()
-
-#while True:
-#    gtk.main_iteration()
