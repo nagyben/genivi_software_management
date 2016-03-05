@@ -86,10 +86,10 @@ class SOTAClientService(rpyc.Service):
         # code runs when the connection has closed
         print "Client disconnected"
 
-    def exposed_initiate_download(self, update_id, send_reply, send_error):
+    def exposed_initiate_download(self, update_id):
         """ function to expose initiate_download to RPyC
         """
-        return SC.initiate_download(update_id, send_reply, send_error)
+        return SC.initiate_download(update_id)
 
     def exposed_update_report(self, update_id, results):
         """ function to expose update_report to RPyC
@@ -174,8 +174,14 @@ try:
     thread = Thread(target = threaded_start)
     thread.start()
 
+    print "Starting in 5"
+    for i in reversed(range(4)):
+        print str(i) + "..."
+        time.sleep(1)
+
+    print "Starting operation..."
     swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation, 0, 0)
+    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
 
     thread.join()
 
