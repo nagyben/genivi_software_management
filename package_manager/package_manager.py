@@ -24,9 +24,7 @@ class PackageManager(object):
     def install_package(self,
                         transaction_id,
                         image_path,
-                        blacklisted_packages,
-                        send_reply,
-                        send_error):
+                        blacklisted_packages):
 
         try:
             print "Package Manager: Install Package"
@@ -66,9 +64,7 @@ class PackageManager(object):
                         transaction_id,
                         image_path,
                         blacklisted_packages,
-                        allow_downgrade,
-                        send_reply,
-                        send_error):
+                        allow_downgrade):
 
         try:
             print "Package Manager: Upgrade package"
@@ -108,9 +104,7 @@ class PackageManager(object):
 
     def remove_package(self,
                        transaction_id,
-                       package_id,
-                       send_reply,
-                       send_error):
+                       package_id):
         try:
             print "Package Manager: Remove package"
             print "  Operation Transaction ID: {}".format(transaction_id)
@@ -156,20 +150,20 @@ class PkgMgrService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_install_package(self, transaction_id, image_path, blacklisted_packages, send_reply, send_error):
+    def exposed_install_package(self, transaction_id, image_path, blacklisted_packages):
         """ function to expose install_pacakge over rpyc
         """
-        return PackMgr.install_package(transaction_id, image_path, blacklisted_packages, send_reply, send_error)
+        return PackMgr.install_package(transaction_id, image_path, blacklisted_packages)
 
-    def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error):
+    def exposed_upgrade_pacakge(self, transaction_id, image_path, blacklisted_packages, allow_downgrade):
         """ function to expose upgrade_package over rpyc
         """
-        return PackMgr.upgrade_package(transaction_id, image_path, blacklisted_packages, allow_downgrade, send_reply, send_error)
+        return PackMgr.upgrade_package(transaction_id, image_path, blacklisted_packages, allow_downgrade)
 
-    def exposed_remove_package(self, transaction_id, package_id, send_reply, send_error):
+    def exposed_remove_package(self, transaction_id, package_id):
         """ function to expose remove_package over rpyc
         """
-        return PackMgr.remove_package(transaction_id, package_id, send_reply, send_error)
+        return PackMgr.remove_package(transaction_id, package_id)
 
     def exposed_get_installed_packages(self):
         """ function to expose get_installed_packages over rpyc

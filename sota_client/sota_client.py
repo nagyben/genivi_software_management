@@ -35,9 +35,7 @@ class SOTAClient(object):
         self.signature = signature
 
     def initiate_download(self,
-                          update_id,
-                          send_reply,
-                          send_error):
+                          update_id):
         global target
         global command
         global size

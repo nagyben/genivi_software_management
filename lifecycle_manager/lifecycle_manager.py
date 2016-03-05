@@ -23,9 +23,7 @@ import rpyc
 class LifecycleManager(object):
     def start_components(self,
                          transaction_id,
-                         components,
-                         send_reply,
-                         send_error):
+                         components):
 
         print "Lifecycle Manager: Got start_components()"
         print "  Operation Transaction ID: {}".format(transaction_id)
@@ -46,9 +44,7 @@ class LifecycleManager(object):
 
     def stop_components(self,
                         transaction_id,
-                        components,
-                        send_reply,
-                        send_error):
+                        components):
 
         print "Lifecycle Manager: Got stop_components()"
         print "  Operation Transaction ID: {}".format(transaction_id)
@@ -75,15 +71,15 @@ class LCMgrService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_start_components(self, transaction_id, components, send_reply, send_error):
+    def exposed_start_components(self, transaction_id, components):
         """ function to expose start_components over RPyC
         """
-        return LCMgr.start_components(transaction_id, components, send_reply, send_error)
+        return LCMgr.start_components(transaction_id, components)
 
-    def exposed_stop_components(self, transaction_id, components, send_reply, send_error):
+    def exposed_stop_components(self, transaction_id, components):
         """ function to expose stop_components over RPyC
         """
-        return LCMgr.stop_components(transaction_id, components, send_reply, send_error)
+        return LCMgr.stop_components(transaction_id, components)
 
 
 print

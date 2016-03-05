@@ -29,9 +29,7 @@ class PartitionManager(object):
                               start,
                               size,
                               guid,
-                              name,
-                              send_reply,
-                              send_error):
+                              name):
 
         print "Partition Manager: create_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -63,9 +61,7 @@ class PartitionManager(object):
                               disk,
                               partition_number,
                               start,
-                              size,
-                              send_reply,
-                              send_error):
+                              size):
 
         print "Partition Manager: resize_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -91,9 +87,7 @@ class PartitionManager(object):
     def delete_disk_partition(self,
                               transaction_id,
                               disk,
-                              partition_number,
-                              send_reply,
-                              send_error):
+                              partition_number):
 
         print "Partition Manager: delete_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -120,9 +114,7 @@ class PartitionManager(object):
                              disk,
                              partition_number,
                              image_path,
-                             blacklisted_partitions,
-                             send_reply,
-                             send_error):
+                             blacklisted_partitions):
 
         print "Partition Manager: write_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -152,9 +144,7 @@ class PartitionManager(object):
                              disk,
                              partition_number,
                              image_path,
-                             blacklisted_partitions,
-                             send_reply,
-                             send_error):
+                             blacklisted_partitions):
 
         print "Partition Manager: patch_disk_partition()"
         print "  Operfation Transaction ID: {}".format(transaction_id)
@@ -187,30 +177,30 @@ class PartMgrService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error):
+    def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name):
         """ function to expose create_disk_partition over RPyC
         """
-        return PartMgr.create_disk_partition(transaction_id, disk, partition_number, partition_type, start, size, guid, name, send_reply, send_error)
+        return PartMgr.create_disk_partition(transaction_id, disk, partition_number, partition_type, start, size, guid, name)
 
-    def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size, send_reply, send_error):
+    def exposed_resize_disk_partition(self, transaction_id, disk, partition_number, start, size):
         """ function to expose resize_disk_partition over RPyC
         """
-        return PartMgr.resize_disk_partition(transaction_id, disk, partition_number, start, size, send_reply, send_error)
+        return PartMgr.resize_disk_partition(transaction_id, disk, partition_number, start, size)
 
-    def exposed_delete_disk_partition(self, transaction_id, disk, partition_number, send_reply, send_error):
+    def exposed_delete_disk_partition(self, transaction_id, disk, partition_number):
         """ function to expose delete_disk_partition over rpyc
         """
-        return PartMgr.delete_disk_partition(transaction_id, disk, partition_number, send_reply, send_error)
+        return PartMgr.delete_disk_partition(transaction_id, disk, partition_number)
 
-    def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+    def exposed_write_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions):
         """ function to expose write_disk_partition over rpyc
         """
-        return PartMgr.write_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+        return PartMgr.write_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions)
 
-    def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error):
+    def exposed_patch_disk_partition(self, transaction_id, disk, partition_number, image_path, blacklisted_partitions):
         """ function to expose patch_disk_partition over rpyc
         """
-        return PartMgr.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions, send_reply, send_error)
+        return PartMgr.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions)
 
 print
 print "Partition Manager."

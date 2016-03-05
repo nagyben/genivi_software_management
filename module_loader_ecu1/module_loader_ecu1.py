@@ -25,9 +25,7 @@ class ECU1ModuleLoader(object):
                               transaction_id,
                               image_path,
                               blacklisted_firmware,
-                              allow_downgrade,
-                              send_reply,
-                              send_error):
+                              allow_downgrade):
 
 
         print "Package Manager: Got flash_module_firmware()"
@@ -64,10 +62,10 @@ class ECU1ModuleLoaderService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error):
+    def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade):
         """ function to expose flash_module_firmware over RPyC
         """
-        return ecu1.flash_module_firmware(transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error)
+        return ecu1.flash_module_firmware(transaction_id, image_path, blacklisted_firmware, allow_downgrade)
 
     def exposed_get_module_firmware_version(self):
         """ function to expose get_module_firmware_version over RPyC

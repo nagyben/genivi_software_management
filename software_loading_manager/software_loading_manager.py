@@ -127,9 +127,7 @@ class SoftwareLoadingManager(object):
                          update_id,
                          description,
                          signature,
-                         request_confirmation,
-                         send_reply,
-                         send_error):
+                         request_confirmation):
 
         print "Got download available"
         print "  ID:      {}".format(update_id)
@@ -157,9 +155,7 @@ class SoftwareLoadingManager(object):
 
     def update_confirmation(self,
                             update_id,
-                            approved,
-                            send_reply,
-                            send_error):
+                            approved):
 
         print "Got update_confirmation()."
         print "  Approved: {}".format(approved)
@@ -191,9 +187,7 @@ class SoftwareLoadingManager(object):
 
     def download_complete(self,
                           update_image,
-                          signature,
-                          send_reply,
-                          send_error):
+                          signature):
 
         print "Got download complete"
         print "  path:      {}".format(update_image)
@@ -229,9 +223,7 @@ class SoftwareLoadingManager(object):
     def operation_result(self,
                          transaction_id,
                          result_code,
-                         result_text,
-                         send_reply,
-                         send_error):
+                         result_text):
 
         try:
             print "Got operation_result()"
@@ -274,25 +266,25 @@ class SLMService(rpyc.Service):
         """
         return SLM.initiate_download(package_id)
 
-    def exposed_update_available(self, update_id, description, signature, request_confirmation, send_reply, send_error):
+    def exposed_update_available(self, update_id, description, signature, request_confirmation):
         """ function to expose update_available over RPyC
         """
-        return SLM.update_available(update_id, description, signature, request_confirmation, send_reply, send_error)
+        return SLM.update_available(update_id, description, signature, request_confirmation)
 
-    def exposed_update_confirmation(self, update_id, approved, send_reply, send_error):
+    def exposed_update_confirmation(self, update_id, approved):
         """ function to expose update_confirmation over RPyC
         """
-        return SLM.update_confirmation( update_id, approved, send_reply, send_error)
+        return SLM.update_confirmation( update_id, approved)
 
-    def exposed_download_complete(self, update_image, signature, send_reply, send_error):
+    def exposed_download_complete(self, update_image, signature):
         """ function to expose download_complete over RPyC
         """
-        return SLM.download_complete(update_image, signature, send_reply, send_error)
+        return SLM.download_complete(update_image, signature)
 
-    def exposed_operation_result(self, transaction_id, result_code, result_text, send_reply, send_error):
+    def exposed_operation_result(self, transaction_id, result_code, result_text):
         """ function to expose operation_result over RPyC
         """
-        return SLM.operation_result(transaction_id, result_code, result_text, send_reply, send_error)
+        return SLM.operation_result(transaction_id, result_code, result_text)
 
     def exposed_get_installed_packages(self, include_packegs, include_module_firmware):
         """ function to expose get_installed_packages over RPyC

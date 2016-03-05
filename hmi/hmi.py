@@ -90,9 +90,7 @@ class HMI(object):
 
     def update_notification(self,
                             update_id,
-                            description,
-                            send_reply,
-                            send_error):
+                            description):
 
         try:
             print "HMI:  update_notification()"
@@ -139,9 +137,7 @@ class HMI(object):
     def manifest_started(self,
                          update_id,
                          total_time_estimate,
-                         description,
-                         send_reply,
-                         send_error):
+                         description):
         try:
             print "Manifest started"
             #send_reply(True)
@@ -160,9 +156,7 @@ class HMI(object):
     def operation_started(self,
                           operation_id,
                           time_estimate,
-                          description,
-                          send_reply,
-                          send_error):
+                          description):
 
         try:
             print "Op started"
@@ -176,9 +170,7 @@ class HMI(object):
 
     def update_report(self,
                       update_id,
-                      results,
-                      send_reply,
-                      send_error):
+                      results):
         try:
             #send_reply(True)
             self.progress_thread.exit_thread()
@@ -204,25 +196,25 @@ class HMIService(rpyc.Service):
     def on_disconnect(self):
         print "A client disconnected"
 
-    def exposed_update_notification(self, update_id, description, send_reply, send_error):
+    def exposed_update_notification(self, update_id, description):
         """ function to expose update_notification over rpyc
         """
-        return hmi.update_notification(update_id, description, send_reply, send_error)
+        return hmi.update_notification(update_id, description)
 
-    def exposed_manifest_started(self, update_id, total_time_estimate, description, send_reply, send_error):
+    def exposed_manifest_started(self, update_id, total_time_estimate, description):
         """ function to expose manifest_started over rpyc
         """
-        return hmi.manifest_started(update_id, total_time_estimate, description, send_reply, send_error)
+        return hmi.manifest_started(update_id, total_time_estimate, description)
 
-    def exposed_operation_started(self, operation_id, time_estimate, description, send_reply, send_error):
+    def exposed_operation_started(self, operation_id, time_estimate, description):
         """ function to expose operation_started over rpyc
         """
-        return hmi.operation_started(operation_id, time_estimate, description, send_reply, send_error)
+        return hmi.operation_started(operation_id, time_estimate, description)
 
-    def exposed_update_report(self, update_id, results, send_reply, send_error):
+    def exposed_update_report(self, update_id, results):
         """ function to expose update_report over rpyc
         """
-        return hmi.update_report(update_id, results, send_reply, send_error)
+        return hmi.update_report(update_id, results)
 
 print
 print "HMI Simulator"
