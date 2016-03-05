@@ -19,31 +19,8 @@ import rpyc
 #
 # ECU Module Loader service
 #
-class ECU1ModuleLoaderService(rpyc.Service):
-    #def __init__(self):
-    #    #super(ECU1ModuleLoaderService, self).__init__()
-    #    #bus_name = dbus.service.BusName('org.genivi.module_loader_ecu1', bus=dbus.SessionBus())
-    #    #dbus.service.Object.__init__(self, bus_name, '/org/genivi/module_loader_ecu1')
-    #    pass
 
-    #@dbus.service.method('org.genivi.module_loader_ecu1',
-    #                     async_callbacks=('send_reply', 'send_error'))
-
-    def on_connect(self):
-        print "A client connected"
-
-    def on_disconnect(self):
-        print "A client disconnected"
-
-    def exposed_init_rpyc(self):
-        return True
-        pass
-
-    def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error):
-        """ function to expose flash_module_firmware over RPyC
-        """
-        return self.flash_module_firmware(transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error)
-
+class ECU1ModuleLoader(object):
     def flash_module_firmware(self,
                               transaction_id,
                               image_path,
@@ -60,12 +37,6 @@ class ECU1ModuleLoaderService(rpyc.Service):
         print "  Allow downgrade:          {}".format(allow_downgrade)
         print "---"
 
-        # Send back an immediate reply since DBUS
-        # doesn't like python dbus-invoked methods to do
-        # their own calls (nested calls).
-        #
-        #send_reply(True)
-
         # Simulate install
         print "Intalling on ECU1: {} (5 sec):".format(image_path)
         for i in xrange(1,50):
@@ -80,27 +51,37 @@ class ECU1ModuleLoaderService(rpyc.Service):
 
         return None
 
-    #@dbus.service.method('org.genivi.module_loader_ecu1')
+    def get_module_firmware_version(self):
+        print "Got get_installed_packages()"
+        return ("ecu1_firmware_1.2.3", 1452904544)
+
+
+
+class ECU1ModuleLoaderService(rpyc.Service):
+    def on_connect(self):
+        print "A client connected"
+
+    def on_disconnect(self):
+        print "A client disconnected"
+
+    def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error):
+        """ function to expose flash_module_firmware over RPyC
+        """
+        return ecu1.flash_module_firmware(transaction_id, image_path, blacklisted_firmware, allow_downgrade, send_reply, send_error)
 
     def exposed_get_module_firmware_version(self):
         """ function to expose get_module_firmware_version over RPyC
         """
-        return self.get_module_firmware_version()
-
-    def get_module_firmware_version(self):
-        print "Got get_installed_packages()"
-        return ("ecu1_firmware_1.2.3", 1452904544)
+        return ecu1.get_module_firmware_version()
 
 print
 print "ECU1 Module Loader."
 print
 
-#DBusGMainLoop(set_as_default=True)
-#module_loader_ecu1 = ECU1ModuleLoaderService()
-print "Starting ECU1 Module Loader rpyc service..."
+print "Initializing ECU1ModuleLoader..."
+ecu1 = ECU1ModuleLoader()
+
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(ECU1ModuleLoaderService, port = swm.PORT_ECU1)
+print "Starting ECU1 Module Loader ThreadedServer on port " + str(swm.PORT_ECU1)
 t.start()
-
-#while True:
-#    gtk.main_iteration()
