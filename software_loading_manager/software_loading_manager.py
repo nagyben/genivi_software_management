@@ -25,7 +25,6 @@ class SoftwareLoadingManager(object):
         self.manifest_processor = manifest_processor.ManifestProcessor(db_path)
 
     def initiate_download(self, package_id):
-        #swm.dbus_method("org.genivi.sota_client", "initiate_download", package_id)
         sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
         sc_rpyc.root.initiate_download(package_id)
 
@@ -39,14 +38,11 @@ class SoftwareLoadingManager(object):
                                  results):
         # Send installation report to HMI
         print "Sending report to hmi.update_report()"
-        #swm.dbus_method("org.genivi.hmi", "update_report", dbus.String(update_id), results)
-        #self.hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
         hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
         hmi_rpyc.root.update_report(update_id, results)
 
         # Send installation report to SOTA
         print "Sending report to sota.update_report()"
-        #swm.dbus_method("org.genivi.sota_client", "update_report", dbus.String(update_id), results)
         sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
         sc_rpyc.root.update_report(update_id, results)
 
@@ -74,8 +70,6 @@ class SoftwareLoadingManager(object):
         return True
 
     def inform_hmi_of_new_operation(self,op):
-        #swm.dbus_method("org.genivi.hmi", "operation_started",
-        #                op.operation_id, op.time_estimate, op.description)
         hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
         hmi_rpyc.root.operation_started(op.operation_id, op.time_estimate, op.description)
         return None
@@ -85,8 +79,6 @@ class SoftwareLoadingManager(object):
         for op in manifest.operations:
             total_time = total_time + op.time_estimate
 
-        #swm.dbus_method("org.genivi.hmi", "manifest_started",
-        #                manifest.update_id, total_time, manifest.description)
         hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
         hmi_rpyc.root.manifest_started(manifest.update_id, total_time, manifest.description)
         return None
@@ -140,7 +132,6 @@ class SoftwareLoadingManager(object):
         # to drive the use case forward.
         #
         if request_confirmation:
-            #swm.dbus_method("org.genivi.hmi", "update_notification", update_id, description)
             hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
             hmi_rpyc.root.update_notification(update_id, description)
 

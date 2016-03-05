@@ -60,18 +60,18 @@ def result(operation_id, code, text):
     }
 
 
-def dbus_method(path, method, *arguments):
-    try:
-        bus = dbus.SessionBus()
-        bus_name = dbus.service.BusName(path, bus=bus)
-        obj = bus.get_object(bus_name.get_name(), "/{}".format(path.replace(".", "/")))
-        remote_method = obj.get_dbus_method(method, path)
-        remote_method(*arguments)
-    except Exception as e:
-        print "dbus_method({}, {}): Exception: {}".format(e, path, method)
-        traceback.print_exc()
-
-    return None
+#def dbus_method(path, method, *arguments):
+#    try:
+#        bus = dbus.SessionBus()
+#        bus_name = dbus.service.BusName(path, bus=bus)
+#        obj = bus.get_object(bus_name.get_name(), "/{}".format(path.replace(".", "/")))
+#        remote_method = obj.get_dbus_method(method, path)
+#        remote_method(*arguments)
+#    except Exception as e:
+#        print "dbus_method({}, {}): Exception: {}".format(e, path, method)
+#        traceback.print_exc()
+#
+#    return None
 
 def send_operation_result(transaction_id, result_code, result_text):
     #
@@ -79,9 +79,7 @@ def send_operation_result(transaction_id, result_code, result_text):
     # Software Loading Manager will distribute the report to all interested parties.
     #
 
-    #dbus_method("org.genivi.software_loading_manager", "operation_result",
-    #            transaction_id, result_code, result_text)
-
+    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
     swlm_rpyc.root.exposed_operation_result(transaction_id, result_code, result_text)
 
     return None
