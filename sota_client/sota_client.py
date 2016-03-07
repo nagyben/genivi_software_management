@@ -162,9 +162,6 @@ print "Image file:         {}".format(image_file)
 print "User Confirmation:  {}".format(request_confirmation)
 
 try:
-    #DBusGMainLoop(set_as_default=True)
-
-    #sota_svc = SOTAClientService(image_file, signature)
 
     print "Initializing SOTA Client"
     SC = SOTAClient(image_file, signature)
@@ -206,14 +203,6 @@ try:
 
     #swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
     #                update_id, description, signature, request_confirmation)
-
-
-
-    #active = True
-
-    # Active will be set to false by installation_report()
-    #while active:
-    #    gtk.main_iteration()
 
 
 except Exception as e:

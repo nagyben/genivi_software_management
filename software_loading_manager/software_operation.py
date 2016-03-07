@@ -19,14 +19,14 @@ class SoftwareOperation:
     def __init__(self, manifest, op_obj):
         self.operation_descriptor = {
             'install_package': (
-                # Path to DBUS and object. 
+                # Path to DBUS and object.
             "org.genivi.package_manager",
 
             # Method to call
             "install_package",
             # Elements to extract fron software operations object and to
             # provide as DBUS call arguments.
-            # Second element in tupe is default value. None -> Mandatory 
+            # Second element in tupe is default value. None -> Mandatory
             [ ("image", None),
               ("blacklisted_packages", dbus.Array(manifest.blacklisted_packages, "s"))
 
@@ -60,7 +60,7 @@ class SoftwareOperation:
                                    [ ("disk", None), ("partition_number", None),
                                      ("type", None), ("start", None), ("size", None),
                                      ("guid", ""), ("name", "") ]),
-            
+
         'resize_disk_partition': ( "org.genivi.partition_manager", "resize_disk_partition",
                                    [ ("disk", None), ("partition_number", None),
                                      ("start", None), ("size", None) ]),
@@ -74,15 +74,15 @@ class SoftwareOperation:
                                     ("image", None),
                                     ("blacklisted_partitions", dbus.Array(manifest.blacklisted_partitions, "s"))
         ]),
-        
+
         'patch_disk_partition': ( "org.genivi.partition_manager", "patch_disk_partition",
                                   [ ("disk", None), ("partition_number", None),
                                     ("image", None),
                                     ("blacklisted_partitions", dbus.Array(manifest.blacklisted_partitions, "s"))
                                   ]),
-        
+
         # FIXME: We need to find a specific module loader
-        #        that handles the target module. 
+        #        that handles the target module.
         #        org.genivi.module_loader needs to be replaced
         #        by org.genivi.module_loader_ecu1
         #        This should be done programmatically
@@ -103,13 +103,13 @@ class SoftwareOperation:
         self.time_estimate = op_obj.get('time_estimate', 0)
         self.description = op_obj.get('description', '')
         self.on_failure = op_obj.get('on_failure', 'continue')
-        
+
         # Retrieve operation
         if not 'operation' in op_obj:
             raise Exception("'operation' not defined in operation {}.".format(self.operation_id))
 
         operation = op_obj['operation']
-        
+
         # Retrieve the operation descriptor
         if operation not in self.operation_descriptor:
             raise Exception("operation {} not supported.".format(operation))
@@ -158,7 +158,7 @@ class SoftwareOperation:
                 self.arguments.append(value)
 
         print "  ----"
-    
+
     def send_transaction(self, transaction_id):
         try:
             swm.dbus_method(self.path, self.method, transaction_id, *self.arguments)

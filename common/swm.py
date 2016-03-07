@@ -73,36 +73,30 @@ def result(operation_id, code, text):
 #
 #    return None
 
+def rpyc_method(port, method, *arguments):
+    try:
+        print "Connecting to rpyc service on localhost at port " + str(port)
+        rpyc_remote = rpyc.connect("localhost", port)
+        rpyc_service_name = rpyc_remote.root.get_service_name()
+        print "Connected to " + str(rpyc_service_name)
+
+        print "Calling " + str(rpyc_service_name) + "." + str(method) + "(" + ','.join(arguments) + ")"
+
+        # find the method name by introspection and call it using the arguments (if any exist)
+        getattr(rpyc_remote.root, str(method))(arguments)
+    except Exception as e:
+        print str(e)
+        traceback.print_exc()
+
+    return None
+
 def send_operation_result(transaction_id, result_code, result_text):
     #
     # Send back operation result.
     # Software Loading Manager will distribute the report to all interested parties.
     #
 
-    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+    swlm_rpyc = rpyc.connect("localhost", PORT_SWLM)
     swlm_rpyc.root.exposed_operation_result(transaction_id, result_code, result_text)
 
     return None
-
-## we must initialize the rpyc connections but it won't work until all of them are running
-#all_servers_running = False
-#
-#while all_servers_running == False:
-#    try:
-#        print "Attempting to connect to rpyc servers"
-#        sc_rpyc         = rpyc.connect("localhost", PORT_SC)
-#        swlm_rpyc       = rpyc.connect("localhost", PORT_SWLM)
-#        partmgr_rpyc    = rpyc.connect("localhost", PORT_PARTMGR)
-#        packmgr_rpyc    = rpyc.connect("localhost", PORT_PACKMGR)
-#        ecu1_rpyc       = rpyc.connect("localhost", PORT_ECU1)
-#        lcmgr_rpyc      = rpyc.connect("localhost", PORT_LCMGR)
-#        hmi_rpyc        = rpyc.connect("localhost", PORT_HMI)
-#
-#        all_servers_running = True
-#
-#        print "All servers running!"
-#    except Exception:
-#        all_servers_running = False
-#        print "Not all servers are running yet. Waiting 1 second before retrying..."
-#        time.sleep(1)
-#
