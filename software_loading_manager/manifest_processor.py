@@ -9,11 +9,11 @@
 import json
 import os
 import subprocess
-import dbus
+#import dbus
 from collections import deque
 import manifest
 
-    
+
 #
 # Simplistic storage of successfully completed
 # operations
@@ -25,7 +25,7 @@ class ManifestProcessor:
         # A queue of Manifest objects waiting to be processed.
         #
         self.image_queue = deque()
-        
+
         # File name we will use to read and store
         # all completed software operations.
         self.storage_fname = storage_fname
@@ -79,11 +79,11 @@ class ManifestProcessor:
     #
     def is_operation_completed(self, transaction_id):
         return not transaction_id or transaction_id in self.completed
-        
+
     def get_next_transaction_id(self):
         self.next_transaction_id = self.next_transaction_id + 1
         return self.next_transaction_id
-    
+
     #
     # Load the next manifest to process from the queue populated
     # by queue_manifest()
@@ -106,7 +106,7 @@ class ManifestProcessor:
                                                         subprocess.CalledProcessError.returncode)
         self.mount_point = None
         self.current_manifest = None
-        
+
         if len(self.image_queue) == 0:
             print "ManifestProcessor:load_next_manifest(): Image queue is empty"
             return False
@@ -118,13 +118,13 @@ class ManifestProcessor:
         # Mount the file system
         self.mount_point = "/tmp/swlm/{}".format(os.getpid())
         print "Will create mount point: {}".format(self.mount_point)
-    
+
         try:
             os.makedirs(self.mount_point)
         except os.OSError as e:
             print "Failed to create {}: {}".format(self.mount_point, e)
             pass
-        
+
         try:
             subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
         except subprocess.CalledProcessError:
@@ -141,7 +141,7 @@ class ManifestProcessor:
 
         # Specify manifest file to load
         manifest_file= "{}/update_manifest.json".format(self.mount_point)
-    
+
         if not self.current_manifest.load_from_file(manifest_file):
             print "Failed to load manifest {}".format(manifest_file)
             self.current_manifest = None
@@ -157,4 +157,3 @@ class ManifestProcessor:
 
 
         return True
-    

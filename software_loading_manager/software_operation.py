@@ -20,7 +20,7 @@ class SoftwareOperation:
         self.operation_descriptor = {
             'install_package': (
                 # Path to DBUS and object.
-            "org.genivi.package_manager",
+            swm.PORT_PACKMGR,
 
             # Method to call
             "install_package",
@@ -28,57 +28,57 @@ class SoftwareOperation:
             # provide as DBUS call arguments.
             # Second element in tupe is default value. None -> Mandatory
             [ ("image", None),
-              ("blacklisted_packages", dbus.Array(manifest.blacklisted_packages, "s"))
+              ("blacklisted_packages", manifest.blacklisted_packages)
 
             ]),
 
-        'upgrade_package': ( "org.genivi.package_manager",
+        'upgrade_package': ( swm.PORT_PACKMGR,
                              "upgrade_package",
                              [ ("image", None),
-                               ("blacklisted_packages", dbus.Array(manifest.blacklisted_packages, "s")),
+                               ("blacklisted_packages", manifest.blacklisted_packages),
                                ("allow_downgrade", manifest.allow_downgrade)
                              ]),
 
-        'remove_package': ( "org.genivi.package_manager",
+        'remove_package': ( swm.PORT_PACKMGR,
                             "remove_package",
                             [ ("package_id", None) ]),
 
-        'start_components': ( "org.genivi.lifecycle_manager",
+        'start_components': ( swm.PORT_LCMGR,
                               "start_components",
                               [ ("components", None) ]),
 
-        'stop_components': ( "org.genivi.lifecycle_manager",
+        'stop_components': ( swm.PORT_LCMGR,
                              "stop_components",
                              [ ("components", None) ]),
 
-        'reboot': ( "org.genivi.lifecycle_manager",
+        'reboot': ( swm.PORT_LCMGR,
                     "reboot",
                     [ ("boot_parameters", "") ]),
 
-        'create_disk_partition': ( "org.genivi.partition_manager",
+        'create_disk_partition': ( swm.PORT_PARTMGR,
                                    "create_disk_partition",
                                    [ ("disk", None), ("partition_number", None),
                                      ("type", None), ("start", None), ("size", None),
                                      ("guid", ""), ("name", "") ]),
 
-        'resize_disk_partition': ( "org.genivi.partition_manager", "resize_disk_partition",
+        'resize_disk_partition': ( swm.PORT_PARTMGR, "resize_disk_partition",
                                    [ ("disk", None), ("partition_number", None),
                                      ("start", None), ("size", None) ]),
 
-        'delete_disk_partition': ( "org.genivi.partition_manager", "delete_disk_partition",
+        'delete_disk_partition': ( swm.PORT_PARTMGR, "delete_disk_partition",
                                    [ ("disk", None), ("partition_number", None) ]),
 
 
-        'write_disk_partition': ( "org.genivi.partition_manager", "write_disk_partition",
+        'write_disk_partition': ( swm.PORT_PARTMGR, "write_disk_partition",
                                   [ ("disk", None), ("partition_number", None),
                                     ("image", None),
-                                    ("blacklisted_partitions", dbus.Array(manifest.blacklisted_partitions, "s"))
+                                    ("blacklisted_partitions", manifest.blacklisted_partitions)
         ]),
 
-        'patch_disk_partition': ( "org.genivi.partition_manager", "patch_disk_partition",
+        'patch_disk_partition': ( swm.PORT_PARTMGR, "patch_disk_partition",
                                   [ ("disk", None), ("partition_number", None),
                                     ("image", None),
-                                    ("blacklisted_partitions", dbus.Array(manifest.blacklisted_partitions, "s"))
+                                    ("blacklisted_partitions", manifest.blacklisted_partitions)
                                   ]),
 
         # FIXME: We need to find a specific module loader
@@ -86,9 +86,9 @@ class SoftwareOperation:
         #        org.genivi.module_loader needs to be replaced
         #        by org.genivi.module_loader_ecu1
         #        This should be done programmatically
-        'flash_module_firmware_ecu1': ( "org.genivi.module_loader_ecu1", "flash_module_firmware",
+        'flash_module_firmware_ecu1': ( swm.PORT_ECU1, "flash_module_firmware",
                                         [ ("image", None),
-                                          ("blacklisted_firmware", dbus.Array(manifest.blacklisted_firmware, "s")),
+                                          ("blacklisted_firmware", manifest.blacklisted_firmware),
                                           ("allow_downgrade", manifest.allow_downgrade)
                                         ])
         }
@@ -161,7 +161,8 @@ class SoftwareOperation:
 
     def send_transaction(self, transaction_id):
         try:
-            swm.dbus_method(self.path, self.method, transaction_id, *self.arguments)
+            #swm.dbus_method(self.path, self.method, transaction_id, *self.arguments)
+            swm.rpyc_method(self.path, self.method, transaction_id, *self.arguments)
         except Exception as e:
             print "SoftwareOperation.send_transaction({}): Exception: {}".format(self.operation_id, e)
             return False

@@ -79,11 +79,11 @@ def rpyc_method(port, method, *arguments):
         rpyc_remote = rpyc.connect("localhost", port)
         rpyc_service_name = rpyc_remote.root.get_service_name()
         print "Connected to " + str(rpyc_service_name)
-
-        print "Calling " + str(rpyc_service_name) + "." + str(method) + "(" + ','.join(arguments) + ")"
+        argslist = ", ".join(str(arg) for arg in arguments)
+        print "Calling " + str(rpyc_service_name) + "." + str(method) + "(" + argslist + ")"
 
         # find the method name by introspection and call it using the arguments (if any exist)
-        getattr(rpyc_remote.root, str(method))(arguments)
+        getattr(rpyc_remote.root, str(method))(*arguments)
     except Exception as e:
         print str(e)
         traceback.print_exc()

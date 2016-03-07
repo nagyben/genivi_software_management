@@ -33,13 +33,6 @@ class PackageManager(object):
             print "  Blacklisted packages:     {}".format(blacklisted_packages)
             print "---"
 
-            #
-            # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do
-            # their own calls (nested calls).
-            #
-            #send_reply(True)
-
             # Simulate install
             print "Intalling package: {} (5 sec)".format(image_path)
             for i in xrange(1,50):
@@ -54,7 +47,7 @@ class PackageManager(object):
         except Exception as e:
             print "install_package() Exception: {}".format(e)
             # traceback.print_exc()
-            e.print_exc()
+            print str(e)
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
