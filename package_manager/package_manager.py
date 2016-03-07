@@ -67,13 +67,6 @@ class PackageManager(object):
             print "  Blacklisted packages:     {}".format(blacklisted_packages)
             print "---"
 
-            #
-            # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do
-            # their own calls (nested calls).
-            #
-            #send_reply(True)
-
             # Simulate install
             print "Upgrading package: {} (5 sec)".format(image_path)
             for i in xrange(1,50):
