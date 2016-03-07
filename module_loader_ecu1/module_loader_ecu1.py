@@ -31,7 +31,7 @@ class ECU1ModuleLoader(object):
         print "Package Manager: Got flash_module_firmware()"
         print "  Operation Transaction ID: {}".format(transaction_id)
         print "  Image Path:               {}".format(image_path)
-        print "  Blacklisted firmware:     {}".format(blacklisted_firmware)
+        #print "  Blacklisted firmware:     {}".format(blacklisted_firmware)
         print "  Allow downgrade:          {}".format(allow_downgrade)
         print "---"
 

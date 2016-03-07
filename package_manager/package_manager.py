@@ -30,7 +30,7 @@ class PackageManager(object):
             print "Package Manager: Install Package"
             print "  Operation Transaction ID: {}".format(transaction_id)
             print "  Image Path:               {}".format(image_path)
-            print "  Blacklisted packages:     {}".format(blacklisted_packages)
+            #print "  Blacklisted packages:     {}".format(blacklisted_packages)
             print "---"
 
             # Simulate install

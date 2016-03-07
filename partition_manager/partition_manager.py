@@ -121,7 +121,7 @@ class PartitionManager(object):
         print "  Disk:                      {}".format(disk)
         print "  Partition Number:          {}".format(partition_number)
         print "  Image Path:                {}".format(image_path)
-        print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
+        #print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
         print "---"
 
         # Simulate write
