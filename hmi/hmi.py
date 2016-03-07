@@ -12,7 +12,7 @@
 import time
 import threading
 import traceback
-import swm
+import common.swm as swm
 from termios import tcflush, TCIOFLUSH
 import sys
 

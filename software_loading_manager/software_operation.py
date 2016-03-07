@@ -9,7 +9,7 @@ import json
 import os
 import subprocess
 import dbus
-import swm
+import common.swm as swm
 #
 # Software operation
 # Contains a single software operation

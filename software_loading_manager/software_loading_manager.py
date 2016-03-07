@@ -12,7 +12,7 @@ import traceback
 import sys
 import getopt
 import os
-import swm
+import common.swm as swm
 
 import rpyc
 

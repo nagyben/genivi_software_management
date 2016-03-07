@@ -12,7 +12,7 @@
 #from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
-import swm
+import common.swm as swm
 
 import rpyc
 
@@ -97,13 +97,6 @@ class PackageManager(object):
             print "  Package ID:               {}".format(package_id)
             print "---"
 
-            #
-            # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do
-            # their own calls (nested calls).
-            #
-            #send_reply(True)
-
             # Simulate remove
             print "Upgrading package: {} (5 sec)".format(package_id)
             for i in xrange(1,50):
@@ -167,6 +160,3 @@ from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PkgMgrService, port = swm.PORT_PACKMGR)
 print "Starting PackageManager ThreadedServer service on port " + str(swm.PORT_PACKMGR)
 t.start()
-
-#while True:
-#    gtk.main_iteration()

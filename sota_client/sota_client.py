@@ -13,7 +13,7 @@
 import getopt
 import sys
 import time
-import swm
+import common.swm as swm
 import traceback
 from threading import Thread
 

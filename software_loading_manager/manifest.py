@@ -12,7 +12,7 @@ import subprocess
 import dbus
 from collections import deque
 import software_operation
-import swm
+import common.swm as swm
 import traceback
 #
 # Load and execute a single manifest
@@ -51,12 +51,12 @@ class Manifest:
             with open(manifest_fname, "r") as f:
                 print "Opened. Will load string"
                 return self.load_from_string(f.read())
-            
+
         except IOError as e:
             print "Could not open manifest {}: {}".format(manifest_fname, e)
             return False
 
-            
+
     # Load a manifest from a string
     def load_from_string(self, manifest_string):
 
@@ -84,12 +84,12 @@ class Manifest:
         print "Manifest.show_hmi_result:       {}".format(self.show_hmi_result)
         print "Manifest.allow_downgrade:       {}".format(self.allow_downgrade)
 
-        # Traverse all operations and create / load up a relevant 
+        # Traverse all operations and create / load up a relevant
         # object for each one.
         try:
             for op in manifest.get('operations', []):
 
-                # Grab opearation id. 
+                # Grab opearation id.
                 op_id = op.get('id', False)
 
                 # Skip entire operation if operation_id is not defined.
@@ -111,9 +111,9 @@ class Manifest:
                     continue
 
                 # Retrieve the class to instantiate for the given operation
-                                
 
-                # Instantiate an object and feed it the manifest file 
+
+                # Instantiate an object and feed it the manifest file
                 # operation object so that the new object can initialize
                 # itself correctly.
                 try:
@@ -139,10 +139,10 @@ class Manifest:
     def start_next_operation(self):
         if len(self.operations) == 0:
             return False
-        
+
         # Retrieve next operation to process.
         op = self.operations.popleft()
- 
+
         transaction_id = self.manifest_processor.get_next_transaction_id()
 
         #
@@ -150,7 +150,7 @@ class Manifest:
         # the Manifest object
         #
         if op.send_transaction(transaction_id):
-            # Store this as an active transaction for which we 
+            # Store this as an active transaction for which we
             # are waiting on a callback reply.
             self.active_operation = op
             return True
@@ -185,4 +185,3 @@ class Manifest:
 
         self.active_operation = None
         return True
-

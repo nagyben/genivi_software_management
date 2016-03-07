@@ -12,7 +12,7 @@
 #from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
-import swm
+import common.swm as swm
 
 import rpyc
 
