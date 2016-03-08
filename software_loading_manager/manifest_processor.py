@@ -101,9 +101,9 @@ class ManifestProcessor:
             try:
                 subprocess.check_call(["/bin/umount", self.mount_point ])
 
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
                 print "Failed to unmount {}: {}".format(self.mount_point,
-                                                        subprocess.CalledProcessError.returncode)
+                                                        e.returncode)
         self.mount_point = None
         self.current_manifest = None
 
@@ -127,10 +127,10 @@ class ManifestProcessor:
 
         try:
             subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as e:
             print "Failed to mount {} on {}: {}".format(image_path,
                                                         self.mount_point,
-                                                        subprocess.CalledProcessError.returncode)
+                                                        e.returncode)
             return False
 
         # Create the new manifest object
@@ -149,9 +149,9 @@ class ManifestProcessor:
             try:
                 subprocess.check_call(["/bin/umount", self.mount_point ])
 
-            except subprocess.CalledProcessError:
+            except subprocess.CalledProcessError as e:
                 print "Failed to unmount {}: {}".format(self.mount_point,
-                                                        subprocess.CalledProcessError.returncode)
+                                                        e.returncode)
             self.mount_point = None
             return False
 
