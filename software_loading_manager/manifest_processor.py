@@ -52,7 +52,7 @@ class ManifestProcessor:
 
         try:
             ifile = open(storage_fname, "r")
-        except:
+        except Exception:
             # File could not be read. Start with empty
             self.completed = []
             return
@@ -123,7 +123,6 @@ class ManifestProcessor:
             os.makedirs(self.mount_point)
         except OSError as e:
             print "Failed to create {}: {}".format(self.mount_point, e)
-            pass
 
         try:
             subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
