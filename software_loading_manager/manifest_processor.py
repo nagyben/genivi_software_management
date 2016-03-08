@@ -121,7 +121,7 @@ class ManifestProcessor:
 
         try:
             os.makedirs(self.mount_point)
-        except os.OSError as e:
+        except OSError as e:
             print "Failed to create {}: {}".format(self.mount_point, e)
             pass
 

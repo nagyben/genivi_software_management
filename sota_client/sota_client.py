@@ -5,17 +5,13 @@
 # Python dbus service that faces SOTA interface
 # of Software Loading manager.
 
-
-#import gtk
-#import dbus
-#import dbus.service
-#from dbus.mainloop.glib import DBusGMainLoop
 import getopt
 import sys
 import time
 import common.swm as swm
 import traceback
 from threading import Thread
+import os
 
 import rpyc
 
@@ -204,6 +200,12 @@ try:
     #swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
     #                update_id, description, signature, request_confirmation)
 
+except KeyboardInterrupt:
+    print 'Interrupted'
+    try:
+        sys.exit(0)
+    except SystemExit:
+        os._exit(0)
 
 except Exception as e:
     print "Exception: {}".format(e)
