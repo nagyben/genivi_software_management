@@ -2,7 +2,7 @@
     "update_id": "media_player_update",
     "name": "Media Player",
     "description": "A media player that will connect to all your devices and stream their audio and video.",
-    "get_user_confirmation": true,
+    "get_user_confirmation": false,
     "show_hmi_progress": false,
     "show_hmi_result": true,
     "operations": [
