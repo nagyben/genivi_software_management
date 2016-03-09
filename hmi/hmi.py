@@ -113,7 +113,7 @@ class HMI(object):
             resp = sys.stdin.read(1)
             tcflush(sys.stdin, TCIOFLUSH)
 
-            # resp = raw_input("DIALOG: Process? (yes/no): ")
+            resp = raw_input("DIALOG: Process? (yes/no): ")
             print
 
             if len(resp) == 0 or (resp[0] != 'y' and resp[0] != 'Y'):

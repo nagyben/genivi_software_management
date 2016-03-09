@@ -166,7 +166,7 @@ try:
     thread.start()
 
     print "Starting in 5"
-    for i in reversed(range(4)):
+    for i in reversed(range(1, 5)):
         print str(i) + "..."
         time.sleep(1)
 
