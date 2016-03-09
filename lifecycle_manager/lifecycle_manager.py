@@ -58,8 +58,8 @@ class LifecycleManager(object):
             print "Stopping :"
             for i in components:
                 #TODO: test whether this actually works on the IMC
-                subprocess.check_call("pkill -f {}".format(i))
                 print "    Stopping: {} (3 sec)".format(i)
+                subprocess.check_call("pkill -f {}".format(i), shell=True)
                 time.sleep(3.0)
             print
             print "Done"
@@ -69,6 +69,13 @@ class LifecycleManager(object):
 
         except subprocess.CalledProcessError as e:
             print "stop_components() CalledProcessError returncode: {}".format(e.returncode)
+            print str(e)
+            swm.send_operation_result(transaction_id,
+                                      swm.SWM_RES_INTERNAL_ERROR,
+                                      "Internal_error: {}".format(e))
+
+        except Exception as e:
+            print "stop_components() Exception: {}".format(e)
             print str(e)
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,

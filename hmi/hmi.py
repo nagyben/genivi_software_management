@@ -109,9 +109,9 @@ class HMI(object):
 
             # If we use input or raw_input, the whole dbus loop hangs after
             # this method returns, for some reason.
-            tcflush(sys.stdin, TCIOFLUSH)
-            resp = sys.stdin.read(1)
-            tcflush(sys.stdin, TCIOFLUSH)
+            #tcflush(sys.stdin, TCIOFLUSH)
+            #resp = sys.stdin.read(1)
+            #tcflush(sys.stdin, TCIOFLUSH)
 
             resp = raw_input("DIALOG: Process? (yes/no): ")
             print

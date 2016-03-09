@@ -54,9 +54,9 @@ def result(operation_id, code, text):
         code = SWM_RES_GENERAL_ERROR
 
     return {
-        'id': dbus.String(operation_id, variant_level=1),
-        'result_code': dbus.Int32(code, variant_level=1),
-        'result_text': dbus.String(text, variant_level=1)
+        'id': operation_id, #dbus.String(operation_id, variant_level=1),
+        'result_code': code, #dbus.Int32(code, variant_level=1),
+        'result_text': text #dbus.String(text, variant_level=1)
     }
 
 

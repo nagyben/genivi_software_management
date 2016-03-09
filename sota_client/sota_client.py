@@ -159,23 +159,6 @@ print "User Confirmation:  {}".format(request_confirmation)
 
 try:
 
-    print "Initializing SOTA Client"
-    SC = SOTAClient(image_file, signature)
-
-    thread = Thread(target = threaded_start)
-    thread.start()
-
-    print "Starting in 5"
-    for i in reversed(range(1, 5)):
-        print str(i) + "..."
-        time.sleep(1)
-
-    print "Starting operation..."
-    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
-    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
-
-    thread.join()
-
     # USE CASE
     #
     # This sota_client will send a update_available() call to the
@@ -195,10 +178,27 @@ try:
     # the manifest file will be fanned out to its correct target (PackMgr,
     # ML, PartMgr)
     #
-    # Once the update has been processed by SLM, an u@dbus
+    # Once the update has been processed by SLM, an update operation
+    # report will be sent back to SC and HMI.
 
-    #swm.dbus_method('org.genivi.software_loading_manager', 'update_available',
-    #                update_id, description, signature, request_confirmation)
+    print "Initializing SOTA Client"
+    SC = SOTAClient(image_file, signature)
+
+    thread = Thread(target = threaded_start)
+    thread.start()
+
+    print "Starting in 5"
+    for i in reversed(range(1, 5)):
+        print str(i) + "..."
+        time.sleep(1)
+
+    print "Starting operation..."
+    swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
+    swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
+
+    thread.join()
+
+
 
 except KeyboardInterrupt:
     print 'Interrupted'
