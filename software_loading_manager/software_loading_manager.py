@@ -223,10 +223,6 @@ class SoftwareLoadingManager(object):
             print "  result_text:    {}".format(result_text)
             print "---"
 
-            # Send back an immediate reply since DBUS
-            # doesn't like python dbus-invoked methods to do
-            # their own calls (nested calls).
-            #SOTAClientService
             manifest = self.get_current_manifest()
             if not manifest:
                 print "Warning: No manifest to handle callback reply"
