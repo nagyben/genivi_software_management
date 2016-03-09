@@ -59,20 +59,6 @@ def result(operation_id, code, text):
         'result_text': text #dbus.String(text, variant_level=1)
     }
 
-
-#def dbus_method(path, method, *arguments):
-#    try:
-#        bus = dbus.SessionBus()
-#        bus_name = dbus.service.BusName(path, bus=bus)
-#        obj = bus.get_object(bus_name.get_name(), "/{}".format(path.replace(".", "/")))
-#        remote_method = obj.get_dbus_method(method, path)
-#        remote_method(*arguments)
-#    except Exception as e:
-#        print "dbus_method({}, {}): Exception: {}".format(e, path, method)
-#        traceback.print_exc()
-#
-#    return None
-
 def rpyc_method(port, method, *arguments):
     try:
         print "Connecting to rpyc service on localhost at port " + str(port)
