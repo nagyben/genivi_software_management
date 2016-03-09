@@ -4,11 +4,6 @@
 #
 # Library to process updates
 
-
-import json
-import os
-import subprocess
-import dbus
 import common.swm as swm
 #
 # Software operation
