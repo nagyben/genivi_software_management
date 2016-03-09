@@ -118,8 +118,8 @@ class SoftwareOperation:
         print "  SoftwareOperation(): time_estimate: {}".format(self.time_estimate)
         print "  SoftwareOperation(): description:   {}".format(self.description)
         print "  SoftwareOperation(): on_failure:    {}".format(self.on_failure)
-        print "  SoftwareOperation(): dbus path:     {}".format(self.path)
-        print "  SoftwareOperation(): dbus method:   {}".format(self.method)
+        print "  SoftwareOperation(): rpyc port:     {}".format(self.path)
+        print "  SoftwareOperation(): rpyc method:   {}".format(self.method)
         # Go through the list of arguments and extract them
         # from the manifest's software operation object
         # These arguments will be provided, in order, to the DBUS call
