@@ -4,12 +4,6 @@
 #
 # Python-based partition manager PoC
 
-
-
-#import gtk
-#import dbus
-#import dbus.service
-#from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
 import common.swm as swm
@@ -43,7 +37,7 @@ class PartitionManager(object):
         print "---"
 
         # Simulate install
-        print "Create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number)
+        print "Simulating create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number)
         for i in xrange(1,30):
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -72,7 +66,7 @@ class PartitionManager(object):
         print "---"
 
         # Simulate install
-        print "Resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        print "Simulating resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -96,7 +90,7 @@ class PartitionManager(object):
         print "---"
 
         # Simulate install
-        print "Delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number)
+        print "Simulating delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number)
         for i in xrange(1,10):
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -125,7 +119,7 @@ class PartitionManager(object):
         print "---"
 
         # Simulate write
-        print "Writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        print "Simulating writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -155,7 +149,7 @@ class PartitionManager(object):
         print "---"
 
         # Simulate patch
-        print "Patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        print "Simulating patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
         for i in xrange(1,50):
             sys.stdout.patch('.')
             sys.stdout.flush()
