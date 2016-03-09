@@ -5,11 +5,6 @@
 # Python-based package manager PoC
 
 
-
-#import gtk
-#import dbus
-#import dbus.service
-#from dbus.mainloop.glib import DBusGMainLoop
 import sys
 import time
 import common.swm as swm
