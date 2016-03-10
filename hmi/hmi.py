@@ -16,6 +16,7 @@ import rpyc
 # configure logging
 logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
 fileHandler.setFormatter(logFormatter)
