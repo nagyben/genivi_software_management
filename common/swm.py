@@ -5,10 +5,9 @@
 #
 # Result constants
 #
-import dbus
 import traceback
 import rpyc
-import time
+import logging
 
 SWM_RES_OK = 0
 SWM_RES_ALREADY_PROCESSED = 1
@@ -48,6 +47,17 @@ ecu1_rpyc       = 0
 lcmgr_rpyc      = 0
 hmi_rpyc        = 0
 
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 
 def result(operation_id, code, text):
     if code < SWM_RES_OK or code >= _SWM_RES_FIRST_UNUSED:
@@ -61,17 +71,17 @@ def result(operation_id, code, text):
 
 def rpyc_method(port, method, *arguments):
     try:
-        print "Connecting to rpyc service on localhost at port " + str(port)
+        logger.info("Connecting to rpyc service on localhost at port " + str(port))
         rpyc_remote = rpyc.connect("localhost", port)
         rpyc_service_name = rpyc_remote.root.get_service_name()
-        print "Connected to " + str(rpyc_service_name)
+        logger.info("Connected to " + str(rpyc_service_name))
         argslist = ", ".join(str(arg) for arg in arguments)
-        print "Calling " + str(rpyc_service_name) + "." + str(method) + "(" + argslist + ")"
+        logger.info("Calling " + str(rpyc_service_name) + "." + str(method) + "(" + argslist + ")")
 
         # find the method name by introspection and call it using the arguments (if any exist)
         getattr(rpyc_remote.root, str(method))(*arguments)
     except Exception as e:
-        print str(e)
+        logger.info(str(e))
         traceback.print_exc()
 
     return None
