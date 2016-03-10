@@ -13,11 +13,11 @@ import rpyc
 import logging
 
 # configure logging
-logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+logFormatter = logging.Formatter("[%(asctime)s] PARTMGR - %(levelname)s - %(message)s")
+logger = logging.getLogger("PARTMGR")
 logger.setLevel(logging.DEBUG)
 
-fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler = logging.FileHandler("logs/{}.log".format("partition_manager"))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 

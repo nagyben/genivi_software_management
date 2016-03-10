@@ -15,11 +15,11 @@ import rpyc
 import logging
 
 # configure logging
-logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+logFormatter = logging.Formatter("[%(asctime)s] PACKMGR - %(levelname)s - %(message)s")
+logger = logging.getLogger("PACKMGR")
 logger.setLevel(logging.DEBUG)
 
-fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler = logging.FileHandler("logs/{}.log".format("package_manager"))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 

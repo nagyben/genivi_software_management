@@ -15,11 +15,11 @@ import traceback
 import logging
 
 # configure logging
-logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+logFormatter = logging.Formatter("[%(asctime)s] MANIFEST - %(levelname)s - %(message)s")
+logger = logging.getLogger("MANIFEST")
 logger.setLevel(logging.DEBUG)
 
-fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler = logging.FileHandler("logs/{}.log".format("software_loading_manager"))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
