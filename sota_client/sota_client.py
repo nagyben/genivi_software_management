@@ -19,14 +19,15 @@ import logging
 
 # configure logging
 logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
 consoleHandler = logging.StreamHandler()
-logger.addHandler(consoleHandler)
+#logger.addHandler(consoleHandler)
 
 # Default command line arguments
 update_id='media_player_1_2_3'
