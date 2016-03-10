@@ -10,6 +10,19 @@ import common.swm as swm
 
 import rpyc
 
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 #
 # Partition manager service
 #
@@ -25,25 +38,25 @@ class PartitionManager(object):
                               guid,
                               name):
 
-        print "Partition Manager: create_disk_partition()"
-        print "  Operfation Transaction ID: {}".format(transaction_id)
-        print "  Disk:                      {}".format(disk)
-        print "  Partition Number:          {}".format(partition_number)
-        print "  Partition Type:            {}".format(partition_type)
-        print "  Start:                     {}".format(start)
-        print "  Size:                      {}".format(size)
-        print "  GUID:                      {}".format(guid)
-        print "  Name:                      {}".format(name)
-        print "---"
+        logger.info("Partition Manager: create_disk_partition()")
+        logger.info("  Operfation Transaction ID: {}".format(transaction_id))
+        logger.info("  Disk:                      {}".format(disk))
+        logger.info("  Partition Number:          {}".format(partition_number))
+        logger.info("  Partition Type:            {}".format(partition_type))
+        logger.info("  Start:                     {}".format(start))
+        logger.info("  Size:                      {}".format(size))
+        logger.info("  GUID:                      {}".format(guid))
+        logger.info("  Name:                      {}".format(name))
+        logger.info("---")
 
         # Simulate install
-        print "Simulating create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number)
+        logger.info("Simulating create partition: disk({}) partiton({}) (3 sec)".format(disk, partition_number))
         for i in xrange(1,30):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.1)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Partition create successful. Disk: {}:{}".format(disk, partition_number))
@@ -57,22 +70,22 @@ class PartitionManager(object):
                               start,
                               size):
 
-        print "Partition Manager: resize_disk_partition()"
-        print "  Operfation Transaction ID: {}".format(transaction_id)
-        print "  Disk:                      {}".format(disk)
-        print "  Partition Number:          {}".format(partition_number)
-        print "  Start:                     {}".format(start)
-        print "  Size:                      {}".format(size)
-        print "---"
+        logger.info("Partition Manager: resize_disk_partition()")
+        logger.info("  Operfation Transaction ID: {}".format(transaction_id))
+        logger.info("  Disk:                      {}".format(disk))
+        logger.info("  Partition Number:          {}".format(partition_number))
+        logger.info("  Start:                     {}".format(start))
+        logger.info("  Size:                      {}".format(size))
+        logger.info("---")
 
         # Simulate install
-        print "Simulating resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        logger.info("Simulating resizing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number))
         for i in xrange(1,50):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                    swm.SWM_RES_OK,
                                    "Partition resize success. Disk: {}:{}".format(disk, partition_number))
@@ -83,20 +96,20 @@ class PartitionManager(object):
                               disk,
                               partition_number):
 
-        print "Partition Manager: delete_disk_partition()"
-        print "  Operfation Transaction ID: {}".format(transaction_id)
-        print "  Disk:                      {}".format(disk)
-        print "  Partition Number:          {}".format(partition_number)
-        print "---"
+        logger.info("Partition Manager: delete_disk_partition()")
+        logger.info("  Operfation Transaction ID: {}".format(transaction_id))
+        logger.info("  Disk:                      {}".format(disk))
+        logger.info("  Partition Number:          {}".format(partition_number))
+        logger.info("---")
 
         # Simulate install
-        print "Simulating delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number)
+        logger.info("Simulating delete partition: disk({}) partiton({}) (5 sec)".format(disk, partition_number))
         for i in xrange(1,10):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                    swm.SWM_RES_OK,
                                    "Partition delete success. Disk: {}:{}".format(disk, partition_number))
@@ -110,22 +123,22 @@ class PartitionManager(object):
                              image_path,
                              blacklisted_partitions):
 
-        print "Partition Manager: write_disk_partition()"
-        print "  Operfation Transaction ID: {}".format(transaction_id)
-        print "  Disk:                      {}".format(disk)
-        print "  Partition Number:          {}".format(partition_number)
-        print "  Image Path:                {}".format(image_path)
-        #print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
-        print "---"
+        logger.info("Partition Manager: write_disk_partition()")
+        logger.info("  Operfation Transaction ID: {}".format(transaction_id))
+        logger.info("  Disk:                      {}".format(disk))
+        logger.info("  Partition Number:          {}".format(partition_number))
+        logger.info("  Image Path:                {}".format(image_path))
+        #logger.info("  Blacklisted Partitions:    {}".format(blacklisted_partitions))
+        logger.info("---")
 
         # Simulate write
-        print "Simulating writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        logger.info("Simulating writing partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number))
         for i in xrange(1,50):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.2)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Partition write success. Disk: {}:{} Image: {}".
@@ -140,22 +153,22 @@ class PartitionManager(object):
                              image_path,
                              blacklisted_partitions):
 
-        print "Partition Manager: patch_disk_partition()"
-        print "  Operfation Transaction ID: {}".format(transaction_id)
-        print "  Disk:                      {}".format(disk)
-        print "  Partition Number:          {}".format(partition_number)
-        print "  Image Path:                {}".format(image_path)
-        print "  Blacklisted Partitions:    {}".format(blacklisted_partitions)
-        print "---"
+        logger.info("Partition Manager: patch_disk_partition()")
+        logger.info("  Operfation Transaction ID: {}".format(transaction_id))
+        logger.info("  Disk:                      {}".format(disk))
+        logger.info("  Partition Number:          {}".format(partition_number))
+        logger.info("  Image Path:                {}".format(image_path))
+        logger.info("  Blacklisted Partitions:    {}".format(blacklisted_partitions))
+        logger.info("---")
 
         # Simulate patch
-        print "Simulating patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number)
+        logger.info("Simulating patching partition: disk({}) partiton({}) (10 sec)".format(disk, partition_number))
         for i in xrange(1,50):
             sys.stdout.patch('.')
             sys.stdout.flush()
             time.sleep(0.2)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Partition patch success. Disk: {}:{} Image: {}".
@@ -166,10 +179,10 @@ class PartitionManager(object):
 
 class PartMgrService(rpyc.Service):
     def on_connect(self):
-        print "A client connected"
+        logger.info("A client connected")
 
     def on_disconnect(self):
-        print "A client disconnected"
+        logger.info("A client disconnected")
 
     def exposed_create_disk_partition(self, transaction_id, disk, partition_number, partition_type, start, size, guid, name):
         """ function to expose create_disk_partition over RPyC
@@ -197,15 +210,15 @@ class PartMgrService(rpyc.Service):
         return PartMgr.patch_disk_partition(transaction_id, disk, partition_number, image_path, blacklisted_partitions)
 
 print
-print "Partition Manager."
+logger.info("Partition Manager.")
 print
 
-print "Initializing PartitionManager..."
+logger.info("Initializing PartitionManager...")
 PartMgr = PartitionManager()
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PartMgrService, port = swm.PORT_PARTMGR)
-print "Starting PartitionManager ThreadedServer on port " + str(swm.PORT_PARTMGR)
+logger.info("Starting PartitionManager ThreadedServer on port " + str(swm.PORT_PARTMGR))
 t.start()
 
 #while True:
