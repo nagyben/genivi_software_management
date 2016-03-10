@@ -9,10 +9,20 @@
 import json
 import os
 import subprocess
-#import dbus
 from collections import deque
 import manifest
+import logging
 
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 #
 # Simplistic storage of successfully completed
@@ -62,11 +72,11 @@ class ManifestProcessor:
         ifile.close()
 
     def queue_image(self, image_path):
-        print "ManifestProcessor:queue_image({}): Called".format(image_path)
+        logger.info("ManifestProcessor:queue_image({}): Called".format(image_path))
         self.image_queue.appendleft(image_path)
 
     def add_completed_operation(self, operation_id):
-        print "ManifestProcessor.add_completed_operation({})".format(operation_id)
+        logger.info("ManifestProcessor.add_completed_operation({})".format(operation_id))
         self.completed.append(operation_id)
         # Slow, but we don't care.
         ofile = open(self.storage_fname, "w")
@@ -92,7 +102,7 @@ class ManifestProcessor:
         #
         # Do we have any nore images to process?
         #
-        print "ManifestProcessor:load_next_manifest(): Called"
+        logger.info("ManifestProcessor:load_next_manifest(): Called")
 
         #
         # Unmount previous mount point
@@ -102,55 +112,55 @@ class ManifestProcessor:
                 subprocess.check_call(["/bin/umount", self.mount_point ])
 
             except subprocess.CalledProcessError as e:
-                print "Failed to unmount {}: {}".format(self.mount_point,
+                logger.exception("Failed to unmount {}: {}".format(self.mount_point),
                                                         e.returncode)
         self.mount_point = None
         self.current_manifest = None
 
         if len(self.image_queue) == 0:
-            print "ManifestProcessor:load_next_manifest(): Image queue is empty"
+            logger.info("ManifestProcessor:load_next_manifest(): Image queue is empty")
             return False
 
-        print "ManifestProcessor:load_next_manifest(): #{}".format(len(self.image_queue))
+        logger.info("ManifestProcessor:load_next_manifest(): #{}".format(len(self.image_queue)))
         image_path = self.image_queue.pop()
-        print "Will process update image: {}".format(image_path)
+        logger.info("Will process update image: {}".format(image_path))
 
         # Mount the file system
         self.mount_point = "/tmp/swlm/{}".format(os.getpid())
-        print "Will create mount point: {}".format(self.mount_point)
+        logger.info("Will create mount point: {}".format(self.mount_point))
 
         try:
             os.makedirs(self.mount_point)
         except OSError as e:
-            print "Failed to create {}: {}".format(self.mount_point, e)
+            logger.exception("Failed to create {}: {}".format(self.mount_point, e))
 
         try:
             subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
         except subprocess.CalledProcessError as e:
-            print "Failed to mount {} on {}: {}".format(image_path,
+            logger.exception("Failed to mount {} on {}: {}".format(image_path,
                                                         self.mount_point,
-                                                        e.returncode)
+                                                        e.returncode))
             return False
 
         # Create the new manifest object
         try:
             self.current_manifest = manifest.Manifest([], [], [], self)
         except Exception as e:
-            print "Manifest exception: {}".format(e)
+            logger.exception("Manifest exception: {}".format(e))
 
         # Specify manifest file to load
         manifest_file= "{}/update_manifest.json".format(self.mount_point)
 
         if not self.current_manifest.load_from_file(manifest_file):
-            print "Failed to load manifest {}".format(manifest_file)
+            logger.warning("Failed to load manifest {}".format(manifest_file))
             self.current_manifest = None
             # Unmount file system
             try:
                 subprocess.check_call(["/bin/umount", self.mount_point ])
 
             except subprocess.CalledProcessError as e:
-                print "Failed to unmount {}: {}".format(self.mount_point,
-                                                        e.returncode)
+                logger.exception("Failed to unmount {}: {}".format(self.mount_point,
+                                                        e.returncode))
             self.mount_point = None
             return False
 
