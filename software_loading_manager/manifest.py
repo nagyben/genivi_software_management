@@ -7,13 +7,23 @@
 
 
 import json
-import os
-import subprocess
-import dbus
 from collections import deque
 import software_operation
 import common.swm as swm
 import traceback
+
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 #
 # Load and execute a single manifest
 #
@@ -46,25 +56,25 @@ class Manifest:
 
     # Load a manifest from a file
     def load_from_file(self, manifest_fname):
-        print "Manifest:load_from_file({}): Called.".format(manifest_fname)
+        logger.info("Manifest:load_from_file({}): Called.".format(manifest_fname))
         try:
             with open(manifest_fname, "r") as f:
-                print "Opened. Will load string"
+                logger.info("Opened. Will load string")
                 return self.load_from_string(f.read())
 
         except IOError as e:
-            print "Could not open manifest {}: {}".format(manifest_fname, e)
+            logger.exception("Could not open manifest {}: {}".format(manifest_fname, e))
             return False
 
 
     # Load a manifest from a string
     def load_from_string(self, manifest_string):
 
-        print "Manifest.load_from_string(): Called"
+        logger.info("Manifest.load_from_string(): Called")
         try:
             manifest = json.loads(manifest_string)
         except ValueError as e:
-            print "Manifest: Failed to parse JSON string: {}".format(e)
+            logger.exception("Manifest: Failed to parse JSON string: {}".format(e))
             return False
 
         # Retrieve top-level elements
@@ -76,13 +86,13 @@ class Manifest:
         self.allow_downgrade = manifest.get('allow_downgrade', False)
         self.get_user_confirmation = manifest.get('get_user_confirmation', False)
         self.operations = deque()
-        print "Manifest.update_id:             {}".format(self.update_id)
-        print "Manifest.name:                  {}".format(self.name)
-        print "Manifest.description:           {}".format(self.description)
-        print "Manifest.get_user_confirmation: {}".format(self.get_user_confirmation)
-        print "Manifest.show_hmi_progress:     {}".format(self.show_hmi_progress)
-        print "Manifest.show_hmi_result:       {}".format(self.show_hmi_result)
-        print "Manifest.allow_downgrade:       {}".format(self.allow_downgrade)
+        logger.info("Manifest.update_id:             {}".format(self.update_id))
+        logger.info("Manifest.name:                  {}".format(self.name))
+        logger.info("Manifest.description:           {}".format(self.description))
+        logger.info("Manifest.get_user_confirmation: {}".format(self.get_user_confirmation))
+        logger.info("Manifest.show_hmi_progress:     {}".format(self.show_hmi_progress))
+        logger.info("Manifest.show_hmi_result:       {}".format(self.show_hmi_result))
+        logger.info("Manifest.allow_downgrade:       {}".format(self.allow_downgrade))
 
         # Traverse all operations and create / load up a relevant
         # object for each one.
@@ -94,7 +104,7 @@ class Manifest:
 
                 # Skip entire operation if operation_id is not defined.
                 if not op_id:
-                    print "Manifest operation is missing operation_id. Skipped"
+                    logger.warning("Manifest operation is missing operation_id. Skipped")
                     continue
 
                 # Check if this operation has already been executed
@@ -106,7 +116,7 @@ class Manifest:
                                    "Operation already processed")
                         )
 
-                    print "Software operation {} already completed. Deleted from manifest".format(op_id)
+                    logger.warning("Software operation {} already completed. Deleted from manifest".format(op_id))
                     # Continue with the next operation
                     continue
 
@@ -119,19 +129,19 @@ class Manifest:
                 try:
                     op_obj = software_operation.SoftwareOperation(self, op)
                 except OperationException as e:
-                    print "Could not process softare operation {}: {}\nSkipped".format(op_id, e)
+                    logger.exception("Could not process softare operation {}: {}\nSkipped".format(op_id, e))
                     return False
 
                 # Add new object to operations we need to process
                 self.operations.append(op_obj)
         except Exception as e:
-            print "Manifest exception: {}".format(e)
+            logger.exception("Manifest exception: {}".format(e))
             traceback.print_exc()
             return False
 
         # Check that we have all mandatory fields set
         if False in [ self.update_id, self.name, self.description ]:
-            print "One of update_id, name, description, or operations not set"
+            logger.warning("One of update_id, name, description, or operations not set")
             return False
 
         return True
@@ -165,7 +175,7 @@ class Manifest:
         # Check that we have an active transaction to
         # work with.
         if not self.active_operation:
-            print "complete_transaction(): Warning: No active transaction for {}.".format(transaction_id)
+            logger.warning("complete_transaction(): Warning: No active transaction for {}.".format(transaction_id))
             return False
 
         # We have completed this specific transaction
