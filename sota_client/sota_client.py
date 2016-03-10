@@ -15,6 +15,19 @@ import os
 
 import rpyc
 
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 # Default command line arguments
 update_id='media_player_1_2_3'
 description='Media Player Update'
@@ -38,18 +51,18 @@ class SOTAClient(object):
         global description
         global vendor
         global path
-        print "Got initiate_download"
-        print "  ID:     {}".format(update_id)
-        print "---"
+        logger.info("Got initiate_download")
+        logger.info("  ID:     {}".format(update_id))
+        logger.info("---")
 
         #  Simulate download
-        print "Downloading"
+        logger.info("Downloading")
         for i in xrange(1,10):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.1)
         print
-        print "Done."
+        logger.info("Done.")
 
         swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
         swlm_rpyc.root.download_complete(self.image_file, self.signature)
@@ -60,25 +73,25 @@ class SOTAClient(object):
                       update_id,
                       results):
         global active
-        print "Update report"
-        print "  ID:          {}".format(update_id)
+        logger.info("Update report")
+        logger.info("  ID:          {}".format(update_id))
         for result in results:
-            print "    operation_id: {}".format(result['id'])
-            print "    code:         {}".format(result['result_code'])
-            print "    text:         {}".format(result['result_text'])
-            print "  ---"
-        print "---"
+            logger.info("    operation_id: {}".format(result['id']))
+            logger.info("    code:         {}".format(result['result_code']))
+            logger.info("    text:         {}".format(result['result_text']))
+            logger.info("  ---")
+        logger.info("---")
         active = False
         return None
 
 class SOTAClientService(rpyc.Service):
     def on_connect(self):
         # code runs when connection is created
-        print "Client connected"
+        logger.info("Client connected")
 
     def on_disconnect(self):
         # code runs when the connection has closed
-        print "Client disconnected"
+        logger.info("Client disconnected")
 
     def exposed_initiate_download(self, update_id):
         """ function to expose initiate_download to RPyC
@@ -108,14 +121,14 @@ def usage():
 def threaded_start():
     from rpyc.utils.server import ThreadedServer
     t = ThreadedServer(SOTAClientService, port = swm.PORT_SC)
-    print "Launching SOTA Client ThreadedServer on port " + str(swm.PORT_SC)
+    logger.info("Launching SOTA Client ThreadedServer on port " + str(swm.PORT_SC))
     t.start()
 
 # === entry point ===
 try:
     opts, args= getopt.getopt(sys.argv[1:], "u:d:i:s:c")
-except getopt.GetoptError:
-    print "Could not parse arguments."
+except getopt.GetoptError as e:
+    logger.exception("Could not parse arguments.")
     usage()
 
 image_file = None
@@ -133,12 +146,12 @@ for o, a in opts:
     elif o == "-c":
         request_confirmation = True
     else:
-        print "Unknown option: {}".format(o)
+        logger.warning("Unknown option: {}".format(o))
         usage()
 
 if not image_file:
     print
-    print "No -i image_file provided."
+    logger.warning("No -i image_file provided.")
     print
     usage()
 
@@ -146,16 +159,16 @@ if not image_file:
 try:
     image_desc = open(image_file, "r")
 except IOError as e:
-    print "Could not open {} for reading: {}".format(image_file, e)
+    logger.exception("Could not open {} for reading: {}".format(image_file, e))
     sys.exit(255)
 
 image_desc.close()
 
-print "Will simulate downloaded update:"
-print "Update ID:          {}".format(update_id)
-print "Description:        {}".format(description)
-print "Image file:         {}".format(image_file)
-print "User Confirmation:  {}".format(request_confirmation)
+logger.info("Will simulate downloaded update:")
+logger.info("Update ID:          {}".format(update_id))
+logger.info("Description:        {}".format(description))
+logger.info("Image file:         {}".format(image_file))
+logger.info("User Confirmation:  {}".format(request_confirmation))
 
 try:
 
@@ -181,18 +194,18 @@ try:
     # Once the update has been processed by SLM, an update operation
     # report will be sent back to SC and HMI.
 
-    print "Initializing SOTA Client"
+    logger.info("Initializing SOTA Client")
     SC = SOTAClient(image_file, signature)
 
     thread = Thread(target = threaded_start)
     thread.start()
 
-    print "Starting in 5"
+    logger.info("Starting in 5")
     for i in reversed(range(1, 5)):
-        print str(i) + "..."
+        logger.info(str(i) + "...")
         time.sleep(1)
 
-    print "Starting operation..."
+    logger.info("Starting operation...")
     swlm_rpyc = rpyc.connect("localhost", swm.PORT_SWLM)
     swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
 
@@ -201,12 +214,12 @@ try:
 
 
 except KeyboardInterrupt:
-    print 'Interrupted'
+    logger.info('Interrupted')
     try:
         sys.exit(0)
     except SystemExit:
         os._exit(0)
 
 except Exception as e:
-    print "Exception: {}".format(e)
+    logger.exception("Exception: {}".format(e))
     traceback.print_exc()
