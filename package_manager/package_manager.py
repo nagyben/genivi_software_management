@@ -46,8 +46,8 @@ class PackageManager(object):
             # Simulate install
             #TODO: implement install package routine
             # I think the below will work
-            subprocess.check_call("rpm -ivh --force {}".format(image_path), shell=True)
-            subprocess.check_call("sync", shell=True)
+            subprocess.check_output("rpm -ivh --force {}".format(image_path), shell=True)
+            subprocess.check_output("sync", shell=True)
 
             logger.info("Intalling package: {} (5 sec)".format(image_path))
             for i in xrange(1,50):
@@ -61,7 +61,7 @@ class PackageManager(object):
                                       "Installation successful. Path: {}".format(image_path))
 
         except subprocess.CalledProcessError as e:
-            logger.exception("install_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception("install_package() CalledProcessError: {}".format(e.output))
             logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
@@ -93,8 +93,8 @@ class PackageManager(object):
             # Simulate install
             #TODO: implement upgrade_package routine
             #I think the below will work
-            subprocess.check_call("rpm -Uvh --force --replacefiles {}".format(image_path), shell=True)
-            subprocess.check_call("sync", shell=True)
+            subprocess.check_output("rpm -Uvh --force --replacefiles {}".format(image_path), shell=True)
+            subprocess.check_output("sync", shell=True)
 
             logger.info("Upgrading package: {} (5 sec)".format(image_path))
             for i in xrange(1,50):
@@ -108,7 +108,7 @@ class PackageManager(object):
                                       "Upgrade successful. Path: {}".format(image_path))
 
         except subprocess.CalledProcessError as e:
-            logger.exception("upgrade_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception("upgrade_package() CalledProcessError: {}".format(e.output))
             logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
@@ -134,8 +134,8 @@ class PackageManager(object):
 
             # Simulate remove
             #TODO: test remove_package logic
-            subprocess.check_call("rpm -e {}".format(package_id), shell=True)
-            subprocess.check_call("sync", shell=True)
+            subprocess.check_output("rpm -e {}".format(package_id), shell=True)
+            subprocess.check_output("sync", shell=True)
 
             logger.info("Removing package: {} (5 sec)".format(package_id))
             for i in xrange(1,50):
@@ -149,7 +149,7 @@ class PackageManager(object):
                                       "Removal successful. Package_id: {}".format(package_id))
 
         except subprocess.CalledProcessError as e:
-            logger.exception("remove_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception("remove_package() CalledProcessError: {}".format(e.output))
             logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
