@@ -16,6 +16,19 @@ import common.swm as swm
 
 import rpyc
 
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 #
 # ECU Module Loader service
 #
@@ -28,21 +41,21 @@ class ECU1ModuleLoader(object):
                               allow_downgrade):
 
 
-        print "Package Manager: Got flash_module_firmware()"
-        print "  Operation Transaction ID: {}".format(transaction_id)
-        print "  Image Path:               {}".format(image_path)
-        #print "  Blacklisted firmware:     {}".format(blacklisted_firmware)
-        print "  Allow downgrade:          {}".format(allow_downgrade)
-        print "---"
+        logger.info("Package Manager: Got flash_module_firmware()")
+        logger.info("  Operation Transaction ID: {}".format(transaction_id))
+        logger.info("  Image Path:               {}".format(image_path))
+        #logger.info("  Blacklisted firmware:     {}".format(blacklisted_firmware))
+        logger.info("  Allow downgrade:          {}".format(allow_downgrade))
+        logger.info("---")
 
         # Simulate install
-        print "Intalling on ECU1: {} (5 sec):".format(image_path)
+        logger.info("Intalling on ECU1: {} (5 sec):".format(image_path))
         for i in xrange(1,50):
             sys.stdout.write('.')
             sys.stdout.flush()
             time.sleep(0.1)
         print
-        print "Done"
+        logger.info("Done")
         swm.send_operation_result(transaction_id,
                                   swm.SWM_RES_OK,
                                   "Firmware flashing successful for ecu1. Path: {}".format(image_path))
@@ -50,17 +63,17 @@ class ECU1ModuleLoader(object):
         return None
 
     def get_module_firmware_version(self):
-        print "Got get_installed_packages()"
+        logger.info("Got get_installed_packages()")
         return ("ecu1_firmware_1.2.3", 1452904544)
 
 
 
 class ECU1ModuleLoaderService(rpyc.Service):
     def on_connect(self):
-        print "A client connected"
+        logger.info("A client connected")
 
     def on_disconnect(self):
-        print "A client disconnected"
+        logger.info("A client disconnected")
 
     def exposed_flash_module_firmware(self, transaction_id, image_path, blacklisted_firmware, allow_downgrade):
         """ function to expose flash_module_firmware over RPyC
@@ -73,13 +86,13 @@ class ECU1ModuleLoaderService(rpyc.Service):
         return ecu1.get_module_firmware_version()
 
 print
-print "ECU1 Module Loader."
+logger.info("ECU1 Module Loader.")
 print
 
-print "Initializing ECU1ModuleLoader..."
+logger.info("Initializing ECU1ModuleLoader...")
 ecu1 = ECU1ModuleLoader()
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(ECU1ModuleLoaderService, port = swm.PORT_ECU1)
-print "Starting ECU1 Module Loader ThreadedServer on port " + str(swm.PORT_ECU1)
+logger.info("Starting ECU1 Module Loader ThreadedServer on port " + str(swm.PORT_ECU1))
 t.start()
