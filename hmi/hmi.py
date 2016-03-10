@@ -5,18 +5,24 @@
 # Python-based hmi PoC for Software Loading Manager
 #
 
-#import gtk
-#import dbus
-#import dbus.service
-#from dbus.mainloop.glib import DBusGMainLoop
 import time
 import threading
 import traceback
 import common.swm as swm
-from termios import tcflush, TCIOFLUSH
-import sys
 
+import logging
 import rpyc
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
 
 class DisplayProgress(threading.Thread):
 
@@ -93,19 +99,19 @@ class HMI(object):
                             description):
 
         try:
-            print "HMI:  update_notification()"
-            print "  ID:            {}".format(update_id)
-            print "  description:   {}".format(description)
-            print "---"
+            logger.info("HMI:  update_notification()")
+            logger.info("  ID:            {}".format(update_id))
+            logger.info("  description:   {}".format(description))
+            logger.info("---")
 
             print
             print
-            print "DIALOG:"
-            print "DIALOG: UPDATE AVAILABLE"
-            print "DIALOG:   update_id:   {}".format(update_id)
-            print "DIALOG:   Description: {}".format(description)
-            print "DIALOG:"
-            print "DIALOG: Process? (yes/no)"
+            logger.info("DIALOG:")
+            logger.info("DIALOG: UPDATE AVAILABLE")
+            logger.info("DIALOG:   update_id:   {}".format(update_id))
+            logger.info("DIALOG:   Description: {}".format(description))
+            logger.info("DIALOG:")
+            logger.info("DIALOG: Process? (yes/no)")
 
             # If we use input or raw_input, the whole dbus loop hangs after
             # this method returns, for some reason.
@@ -129,7 +135,7 @@ class HMI(object):
             swlm_rpyc.root.update_confirmation(update_id, approved)
 
         except Exception as e:
-            print "Exception: {}".format(e)
+            logger.exception("Exception: {}".format(e))
             traceback.print_exc()
 
         return None
@@ -139,7 +145,7 @@ class HMI(object):
                          total_time_estimate,
                          description):
         try:
-            print "Manifest started"
+            logger.info("Manifest started")
             #send_reply(True)
             print "\033[H\033[J"
             ct = time.time()
@@ -148,7 +154,7 @@ class HMI(object):
                                               ct + float(total_time_estimate) / 1000.0)
 
         except Exception as e:
-            print "Exception: {}".format(e)
+            logger.exception("Exception: {}".format(e))
             traceback.print_exc()
 
         return None
@@ -159,12 +165,12 @@ class HMI(object):
                           description):
 
         try:
-            print "Op started"
+            logger.info("Op started")
             #send_reply(True)
             ct = time.time()
             self.progress_thread.set_operation(description, ct, ct + float(time_estimate) / 1000.0)
         except Exception as e:
-            print "Exception: {}".format(e)
+            logger.exception("Exception: {}".format(e))
             traceback.print_exc()
         return None
 
@@ -174,27 +180,27 @@ class HMI(object):
         try:
             #send_reply(True)
             self.progress_thread.exit_thread()
-            print "Update report"
-            print "  ID:          {}".format(update_id)
-            print "  results:"
+            logger.info("Update report")
+            logger.info("  ID:          {}".format(update_id))
+            logger.info("  results:")
             for result in results:
-                print "    operation_id: {}".format(result['id'])
-                print "    code:         {}".format(result['result_code'])
-                print "    text:         {}".format(result['result_text'])
-                print "  ---"
-            print "---"
+                logger.info("    operation_id: {}".format(result['id']))
+                logger.info("    code:         {}".format(result['result_code']))
+                logger.info("    text:         {}".format(result['result_text']))
+                logger.info("  ---")
+            logger.info("---")
         except Exception as e:
-            print "Exception: {}".format(e)
+            logger.exception("Exception: {}".format(e))
             traceback.print_exc()
         return None
 
 
 class HMIService(rpyc.Service):
     def on_connect(self):
-        print "A client connected"
+        logger.info("A client connected")
 
     def on_disconnect(self):
-        print "A client disconnected"
+        logger.info("A client disconnected")
 
     def exposed_update_notification(self, update_id, description):
         """ function to expose update_notification over rpyc
@@ -217,16 +223,16 @@ class HMIService(rpyc.Service):
         return hmi.update_report(update_id, results)
 
 print
-print "HMI Simulator"
-print "Please enter package installation approval when prompted"
+logger.info("HMI Simulator")
+logger.info("Please enter package installation approval when prompted")
 print
 
 #gtk.gdk.threads_init() TODO: will this break the threads?
 
-print "Initializing HMI..."
+logger.info("Initializing HMI...")
 hmi = HMI()
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(HMIService, port = swm.PORT_HMI)
-print "Starting HMIService ThreadServer on port " + str(swm.PORT_HMI)
+logger.info("Starting HMIService ThreadServer on port " + str(swm.PORT_HMI))
 t.start()
