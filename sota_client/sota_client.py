@@ -27,7 +27,7 @@ fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
 consoleHandler = logging.StreamHandler()
-#logger.addHandler(consoleHandler)
+logger.addHandler(consoleHandler)
 
 # Default command line arguments
 update_id='media_player_1_2_3'
