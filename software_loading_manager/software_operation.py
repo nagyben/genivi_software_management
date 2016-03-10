@@ -5,6 +5,19 @@
 # Library to process updates
 
 import common.swm as swm
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 #
 # Software operation
 # Contains a single software operation
@@ -88,7 +101,7 @@ class SoftwareOperation:
                                         ])
         }
 
-        print "  SoftwareOperation(): Called"
+        logger.info("  SoftwareOperation(): Called")
         # Retrieve unique id for sofware operation
         if not 'id' in op_obj:
             raise Exception("SoftwareOperation(): 'id' not defined in: {}".format(op_obj))
@@ -113,13 +126,13 @@ class SoftwareOperation:
         # software operations to provide with DBUS call.
         (self.path, self.method, arguments) = self.operation_descriptor[operation]
 
-        print "  SoftwareOperation(): operation_id:  {}".format(self.operation_id)
-        print "  SoftwareOperation(): operation:     {}".format(operation)
-        print "  SoftwareOperation(): time_estimate: {}".format(self.time_estimate)
-        print "  SoftwareOperation(): description:   {}".format(self.description)
-        print "  SoftwareOperation(): on_failure:    {}".format(self.on_failure)
-        print "  SoftwareOperation(): rpyc port:     {}".format(self.path)
-        print "  SoftwareOperation(): rpyc method:   {}".format(self.method)
+        logger.info("  SoftwareOperation(): operation_id:  {}".format(self.operation_id))
+        logger.info("  SoftwareOperation(): operation:     {}".format(operation))
+        logger.info("  SoftwareOperation(): time_estimate: {}".format(self.time_estimate))
+        logger.info("  SoftwareOperation(): description:   {}".format(self.description))
+        logger.info("  SoftwareOperation(): on_failure:    {}".format(self.on_failure))
+        logger.info("  SoftwareOperation(): rpyc port:     {}".format(self.path))
+        logger.info("  SoftwareOperation(): rpyc method:   {}".format(self.method))
         # Go through the list of arguments and extract them
         # from the manifest's software operation object
         # These arguments will be provided, in order, to the DBUS call
@@ -129,17 +142,17 @@ class SoftwareOperation:
                 # and default was None, specifying that the argument
                 # is mandatory.
                 if default_value == None:
-                    print "  SoftwareOperation(): Mandatory element {} not defined in operation".format(argument)
+                    logger.warning("  SoftwareOperation(): Mandatory element {} not defined in operation".format(argument))
 
                     raise Exception("Element {} not defined in operation: {}".format(argument,self.operation_id))
                 else:
                     # Argument not found in software operation, but
                     # we have a default value
                     value = default_value
-                    print "  SoftwareOperation(): method_arg {} = {} (default)".format(argument, value)
+                    logger.info("  SoftwareOperation(): method_arg {} = {} (default)".format(argument, value))
             else:
                 value = op_obj[argument]
-                print "  SoftwareOperation(): method_arg {} = {} (from manifest)".format(argument, value)
+                logger.info("  SoftwareOperation(): method_arg {} = {} (from manifest)".format(argument, value))
 
             #
             # Ugly workaround.
@@ -152,14 +165,14 @@ class SoftwareOperation:
             else:
                 self.arguments.append(value)
 
-        print "  ----"
+        logger.info("  ----")
 
     def send_transaction(self, transaction_id):
         try:
             #swm.dbus_method(self.path, self.method, transaction_id, *self.arguments)
             swm.rpyc_method(self.path, self.method, transaction_id, *self.arguments)
         except Exception as e:
-            print "SoftwareOperation.send_transaction({}): Exception: {}".format(self.operation_id, e)
+            logger.exception("SoftwareOperation.send_transaction({}): Exception: {}".format(self.operation_id, e))
             return False
 
         return True

@@ -16,6 +16,19 @@ import common.swm as swm
 
 import rpyc
 
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 #
 # Define the DBUS-facing Software Loading Manager service
 #
@@ -37,12 +50,12 @@ class SoftwareLoadingManager(object):
                                  update_id,
                                  results):
         # Send installation report to HMI
-        print "Sending report to hmi.update_report()"
+        logger.info("Sending report to hmi.update_report()")
         hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
         hmi_rpyc.root.update_report(update_id, results)
 
         # Send installation report to SOTA
-        print "Sending report to sota.update_report()"
+        logger.info("Sending report to sota.update_report()")
         sc_rpyc = rpyc.connect("localhost", swm.PORT_SC)
         sc_rpyc.root.update_report(update_id, results)
 
@@ -121,10 +134,10 @@ class SoftwareLoadingManager(object):
                          signature,
                          request_confirmation):
 
-        print "Got download available"
-        print "  ID:      {}".format(update_id)
-        print "  descr:   {}".format(description)
-        print "  confirm: {}".format(request_confirmation)
+        logger.info("Got download available")
+        logger.info("  ID:      {}".format(update_id))
+        logger.info("  descr:   {}".format(description))
+        logger.info("  confirm: {}".format(request_confirmation))
 
         #
         # Send a notification to the HMI to get user approval / decline
@@ -135,12 +148,12 @@ class SoftwareLoadingManager(object):
             hmi_rpyc = rpyc.connect("localhost", swm.PORT_HMI)
             hmi_rpyc.root.update_notification(update_id, description)
 
-            print "  Called hmi.update_notification()"
-            print "---"
+            logger.info("  Called hmi.update_notification()")
+            logger.info("---")
             return None
 
-        print "  No user confirmation requested. Will initiate download"
-        print "---"
+        logger.info("  No user confirmation requested. Will initiate download")
+        logger.info("---")
         self.initiate_download(update_id)
         return None
 
@@ -148,9 +161,9 @@ class SoftwareLoadingManager(object):
                             update_id,
                             approved):
 
-        print "Got update_confirmation()."
-        print "  Approved: {}".format(approved)
-        print "  ID:       {}".format(update_id)
+        logger.info("Got update_confirmation().")
+        logger.info("  Approved: {}".format(approved))
+        logger.info("  ID:       {}".format(update_id))
         if approved:
             #
             # Call the SOTA client and ask it to start the download.
@@ -158,21 +171,21 @@ class SoftwareLoadingManager(object):
             # download complete on this process to actually
             # process the package.
             #
-            print "Approved: Will call initiate_download()"
+            logger.info("Approved: Will call initiate_download()")
             self.initiate_download(update_id)
-            print "Approved: Called sota_client.initiate_download()"
-            print "---"
+            logger.info("Approved: Called sota_client.initiate_download()")
+            logger.info("---")
         else:
             # User did not approve. Send installation report
-            print "Declined: Will call installation_report()"
+            logger.info("Declined: Will call installation_report()")
             self.distribute_update_result(update_id, [
                 swm.result('N/A',
                            swm.SWM_RES_USER_DECLINED,
                            "Installation declined by user")
             ])
 
-            print "Declined. Called sota_client.installation_report()"
-            print "---"
+            logger.info("Declined. Called sota_client.installation_report()")
+            logger.info("---")
 
         return None
 
@@ -180,10 +193,10 @@ class SoftwareLoadingManager(object):
                           update_image,
                           signature):
 
-        print "Got download complete"
-        print "  path:      {}".format(update_image)
-        print "  signature: {}".format(signature)
-        print "---"
+        logger.info("Got download complete")
+        logger.info("  path:      {}".format(update_image))
+        logger.info("  signature: {}".format(signature))
+        logger.info("---")
 
         #
         # Send back an immediate reply since DBUS
@@ -191,7 +204,7 @@ class SoftwareLoadingManager(object):
         # their own calls (nested calls).
         #
         #send_reply(True)
-        print "FIXME: Check signature of update image"
+        logger.warning("FIXME: Check signature of update image")
 
         #
         # Queue the image.
@@ -200,7 +213,7 @@ class SoftwareLoadingManager(object):
             self.manifest_processor.queue_image(update_image)
             self.start_next_operation()
         except Exception as e:
-            print "Failed to process downloaded update: {}".format(e)
+            logger.exception("Failed to process downloaded update: {}".format(e))
             traceback.print_exc()
 
         return None
@@ -217,15 +230,15 @@ class SoftwareLoadingManager(object):
                          result_text):
 
         try:
-            print "Got operation_result()"
-            print "  transaction_id: {}".format(transaction_id)
-            print "  result_code:    {}".format(result_code)
-            print "  result_text:    {}".format(result_text)
-            print "---"
+            logger.info("Got operation_result()")
+            logger.info("  transaction_id: {}".format(transaction_id))
+            logger.info("  result_code:    {}".format(result_code))
+            logger.info("  result_text:    {}".format(result_text))
+            logger.info("---")
 
             manifest = self.get_current_manifest()
             if not manifest:
-                print "Warning: No manifest to handle callback reply"
+                logger.info("Warning: No manifest to handle callback reply")
                 return None
 
             manifest.complete_transaction(transaction_id, result_code, result_text)
@@ -233,20 +246,20 @@ class SoftwareLoadingManager(object):
                 self.distribute_update_result(manifest.update_id,
                                               manifest.operation_results)
         except Exception as e:
-            print "Failed to process operation result: {}".format(e)
+            logger.info("Failed to process operation result: {}".format(e))
             traceback.print_exc()
 
     def get_installed_packages(self, include_packegs, include_module_firmware):
-        print "Got get_installed_packages()"
+        logger.info("Got get_installed_packages()")
         return [ "bluez_driver", "bluez_apps" ]
 
 
 class SLMService(rpyc.Service):
     def on_connect(self):
-        print "A client connected"
+        logger.info("A client connected")
 
     def on_disconnect(self):
-        print "A client disconnected"
+        logger.info("A client disconnected")
 
     def exposed_initiate_download(self, package_id):
         """ function to expose update_report to RPyC
@@ -291,14 +304,14 @@ def usage():
 # === Entry point ===
 
 print
-print "Software Loading Manager."
+logger.info("Software Loading Manager.")
 print
 
 try:
     opts, args= getopt.getopt(sys.argv[1:], "rd:")
 
-except getopt.GetoptError:
-    print "Could not parse arguments."
+except getopt.GetoptError as e:
+    logger.exception("Could not parse arguments.")
     usage()
 
 db_path = "/tmp/completed_operations.json"
@@ -310,7 +323,7 @@ for o, a in opts:
     elif o == "-d":
         db_path = a
     else:
-        print "Unknown option: {}".format(o)
+        logger.warning("Unknown option: {}".format(o))
         usage()
 
 #DBusGMainLoop(set_as_default=True)
@@ -324,13 +337,13 @@ if reset_db:
 
 # register service over RPyC
 
-print "Initializing SoftwareLoadingManager..."
+logger.info("Initializing SoftwareLoadingManager...")
 SLM = SoftwareLoadingManager(db_path)
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(SLMService, port = swm.PORT_SWLM)
-print "Starting SWLM ThreadedServer on port " + str(swm.PORT_SWLM)
+logger.info("Starting SWLM ThreadedServer on port " + str(swm.PORT_SWLM))
 t.start() # this blocks until keyboardinterrupt
-print "SWLM rpyc service stopped."
+logger.info("SWLM rpyc service stopped.")
 
 # doesn't reach here util the script ends.
