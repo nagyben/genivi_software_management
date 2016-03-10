@@ -12,6 +12,19 @@ import subprocess
 
 import rpyc
 
+import logging
+
+# configure logging
+logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logger = logging.getLogger()
+
+fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler.setFormatter(logFormatter)
+logger.addHandler(fileHandler)
+
+consoleHandler = logging.StreamHandler()
+logger.addHandler(consoleHandler)
+
 #
 # Package manager service
 #
@@ -23,11 +36,11 @@ class PackageManager(object):
                         blacklisted_packages):
 
         try:
-            print "Package Manager: Install Package"
-            print "  Operation Transaction ID: {}".format(transaction_id)
-            print "  Image Path:               {}".format(image_path)
-            #print "  Blacklisted packages:     {}".format(blacklisted_packages)
-            print "---"
+            logger.info("Package Manager: Install Package")
+            logger.info("  Operation Transaction ID: {}".format(transaction_id))
+            logger.info("  Image Path:               {}".format(image_path))
+            #logger.info("  Blacklisted packages:     {}".format(blacklisted_packages))
+            logger.info("---")
 
             # Simulate install
             #TODO: implement install package routine
@@ -35,28 +48,28 @@ class PackageManager(object):
             subprocess.check_call("rpm -ivh --force {}".format(image_path), shell=True)
             subprocess.check_call("sync", shell=True)
 
-            print "Intalling package: {} (5 sec)".format(image_path)
+            logger.info("Intalling package: {} (5 sec)".format(image_path))
             for i in xrange(1,50):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
             print
-            print "Done"
+            logger.info("Done")
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
                                       "Installation successful. Path: {}".format(image_path))
 
         except subprocess.CalledProcessError as e:
-            print "install_package() CalledProcessError returncode: {}".format(e.returncode)
-            print str(e)
+            logger.exception("install_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
 
         except Exception as e:
-            print "install_package() Exception: {}".format(e)
+            logger.exception("install_package() Exception: {}".format(e))
             # traceback.print_exc()
-            print str(e)
+            logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
@@ -69,12 +82,12 @@ class PackageManager(object):
                         allow_downgrade):
 
         try:
-            print "Package Manager: Upgrade package"
-            print "  Operation Transaction ID: {}".format(transaction_id)
-            print "  Image Path:               {}".format(image_path)
-            print "  Allow downgrade:          {}".format(allow_downgrade)
-            print "  Blacklisted packages:     {}".format(blacklisted_packages)
-            print "---"
+            logger.info("Package Manager: Upgrade package")
+            logger.info("  Operation Transaction ID: {}".format(transaction_id))
+            logger.info("  Image Path:               {}".format(image_path))
+            logger.info("  Allow downgrade:          {}".format(allow_downgrade))
+            logger.info("  Blacklisted packages:     {}".format(blacklisted_packages))
+            logger.info("---")
 
             # Simulate install
             #TODO: implement upgrade_package routine
@@ -82,26 +95,26 @@ class PackageManager(object):
             subprocess.check_call("rpm -Uvh --force --replacefiles {}".format(image_path), shell=True)
             subprocess.check_call("sync", shell=True)
 
-            print "Upgrading package: {} (5 sec)".format(image_path)
+            logger.info("Upgrading package: {} (5 sec)".format(image_path))
             for i in xrange(1,50):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
             print
-            print "Done"
+            logger.info("Done")
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
                                       "Upgrade successful. Path: {}".format(image_path))
 
         except subprocess.CalledProcessError as e:
-            print "upgrade_package() CalledProcessError returncode: {}".format(e.returncode)
-            print str(e)
+            logger.exception("upgrade_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
 
         except Exception as e:
-            print "upgrade_package() Exception: {}".format(e)
+            logger.exception("upgrade_package() Exception: {}".format(e))
             #traceback.print_exc()
             e.print_exc()
             swm.send_operation_result(transaction_id,
@@ -113,36 +126,36 @@ class PackageManager(object):
                        transaction_id,
                        package_id):
         try:
-            print "Package Manager: Remove package"
-            print "  Operation Transaction ID: {}".format(transaction_id)
-            print "  Package ID:               {}".format(package_id)
-            print "---"
+            logger.info("Package Manager: Remove package")
+            logger.info("  Operation Transaction ID: {}".format(transaction_id))
+            logger.info("  Package ID:               {}".format(package_id))
+            logger.info("---")
 
             # Simulate remove
             #TODO: test remove_package logic
             subprocess.check_call("rpm -e {}".format(package_id), shell=True)
             subprocess.check_call("sync", shell=True)
 
-            print "Removing package: {} (5 sec)".format(package_id)
+            logger.info("Removing package: {} (5 sec)".format(package_id))
             for i in xrange(1,50):
                 sys.stdout.write('.')
                 sys.stdout.flush()
                 time.sleep(0.1)
             print
-            print "Done"
+            logger.info("Done")
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_OK,
                                       "Removal successful. Package_id: {}".format(package_id))
 
         except subprocess.CalledProcessError as e:
-            print "remove_package() CalledProcessError returncode: {}".format(e.returncode)
-            print str(e)
+            logger.exception("remove_package() CalledProcessError returncode: {}".format(e.returncode))
+            logger.exception(str(e))
             swm.send_operation_result(transaction_id,
                                       swm.SWM_RES_INTERNAL_ERROR,
                                       "Internal_error: {}".format(e))
 
         except Exception as e:
-            print "remove_package() Exception: {}".format(e)
+            logger.exception("remove_package() Exception: {}".format(e))
             #traceback.print_exc()
             e.print_exc()
             swm.send_operation_result(transaction_id,
@@ -151,16 +164,16 @@ class PackageManager(object):
         return None
 
     def get_installed_packages(self):
-        print "Got get_installed_packages()"
+        logger.info("Got get_installed_packages()")
         return [ 'bluez_driver_1.2.2', 'bluez_apps_2.4.4' ]
 
 
 class PkgMgrService(rpyc.Service):
     def on_connect(self):
-        print "A client connected"
+        logger.info("A client connected")
 
     def on_disconnect(self):
-        print "A client disconnected"
+        logger.info("A client disconnected")
 
     def exposed_install_package(self, transaction_id, image_path, blacklisted_packages):
         """ function to expose install_pacakge over rpyc
@@ -183,13 +196,13 @@ class PkgMgrService(rpyc.Service):
         return PackMgr.get_installed_packages()
 
 print
-print "Package Manager."
+logger.info("Package Manager.")
 print
 
-print "Initializing PackageManager..."
+logger.info("Initializing PackageManager...")
 PackMgr = PackageManager()
 
 from rpyc.utils.server import ThreadedServer
 t = ThreadedServer(PkgMgrService, port = swm.PORT_PACKMGR)
-print "Starting PackageManager ThreadedServer service on port " + str(swm.PORT_PACKMGR)
+logger.info("Starting PackageManager ThreadedServer service on port " + str(swm.PORT_PACKMGR))
 t.start()
