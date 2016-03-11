@@ -48,10 +48,11 @@ lcmgr_rpyc      = 0
 hmi_rpyc        = 0
 
 # configure logging
-logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+logFormatter = logging.Formatter("[%(asctime)s] swm - %(levelname)s - %(message)s")
+logger = logging.getLogger("swm")
+logger.setLevel(logging.DEBUG)
 
-fileHandler = logging.FileHandler("logs/{}.log".format(__name__))
+fileHandler = logging.FileHandler("logs/{}.log".format("swm"))
 fileHandler.setFormatter(logFormatter)
 logger.addHandler(fileHandler)
 
@@ -79,7 +80,8 @@ def rpyc_method(port, method, *arguments):
         logger.info("Calling " + str(rpyc_service_name) + "." + str(method) + "(" + argslist + ")")
 
         # find the method name by introspection and call it using the arguments (if any exist)
-        getattr(rpyc_remote.root, str(method))(*arguments)
+        async_func = rpyc.async(getattr(rpyc_remote.root, str(method)))
+        async_func(*arguments)
     except Exception as e:
         logger.info(str(e))
         traceback.print_exc()

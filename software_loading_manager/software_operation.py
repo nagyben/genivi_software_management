@@ -171,6 +171,7 @@ class SoftwareOperation:
     def send_transaction(self, transaction_id):
         try:
             #swm.dbus_method(self.path, self.method, transaction_id, *self.arguments)
+            logger.info("Calling {}.{}".format(self.path, self.method))
             swm.rpyc_method(self.path, self.method, transaction_id, *self.arguments)
         except Exception as e:
             logger.exception("SoftwareOperation.send_transaction({}): Exception: {}".format(self.operation_id, e))

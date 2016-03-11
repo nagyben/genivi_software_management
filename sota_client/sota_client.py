@@ -198,9 +198,10 @@ try:
     logger.info("Initializing SOTA Client")
     SC = SOTAClient(image_file, signature)
 
-    mounts = ["/",
-              "/var",
-              "/var/psa"]
+    mounts = [#"/",
+              #"/var",
+              #"/var/psa"
+             ]
 
     for mount in mounts:
         try:

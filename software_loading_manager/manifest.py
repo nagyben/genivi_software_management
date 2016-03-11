@@ -129,7 +129,7 @@ class Manifest:
                 # itself correctly.
                 try:
                     op_obj = software_operation.SoftwareOperation(self, op)
-                except OperationException as e:
+                except manifest.OperationException as e:
                     logger.exception("Could not process softare operation {}: {}\nSkipped".format(op_id, e))
                     return False
 
@@ -148,7 +148,10 @@ class Manifest:
         return True
 
     def start_next_operation(self):
+        logger.info("start_next_operation() called")
+        logger.info("len(self.operations) = {}".format(len(self.operations)))
         if len(self.operations) == 0:
+            logger.info("start_next_operation() returning False")
             return False
 
         # Retrieve next operation to process.
@@ -160,12 +163,16 @@ class Manifest:
         # Invoke the software operation object, created by
         # the Manifest object
         #
+        logger.info("Calling op.send_transaction()")
         if op.send_transaction(transaction_id):
             # Store this as an active transaction for which we
             # are waiting on a callback reply.
+            logger.info("start_next_operation(): self.active_operation = op")
             self.active_operation = op
+            logger.info("start_next_operation() returning True")
             return True
 
+        logger.info("start_next_operation() returning False")
         return False
 
 
@@ -173,6 +180,7 @@ class Manifest:
     # Check if this operation has already been executed.
     #
     def complete_transaction(self, transaction_id, result_code, result_text):
+        logger.info("complete_transaction() called with arguments {}, {}, {}".format(transaction_id, result_code, result_text))
         # Check that we have an active transaction to
         # work with.
         if not self.active_operation:
