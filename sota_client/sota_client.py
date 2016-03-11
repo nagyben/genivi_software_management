@@ -12,7 +12,7 @@ import common.swm as swm
 import traceback
 from threading import Thread
 import os
-
+import subprocess
 import rpyc
 
 import logging
@@ -197,6 +197,14 @@ try:
 
     logger.info("Initializing SOTA Client")
     SC = SOTAClient(image_file, signature)
+
+    try:
+        logger.info("Remounting / as rw...")
+        subprocess.check_output("mount -o remount,rw /", shell=True)
+    except subprocess.CalledProcessError as e:
+        logger.exception("Error mounting / as rw: {}".format(e.output))
+        logger.error("Root filesystem could not be mounted as rw - exiting")
+        sys.exit()
 
     thread = Thread(target = threaded_start)
     thread.start()

@@ -80,5 +80,5 @@ fi
 # Create baseline squashfs image
 rm -f ${OUT_FILE}
 #mksquashfs  ${UPDATE_DIR} ${OUT_FILE}
-tar cvzf ${OUT_FILE} ${UPDATE_DIR}
+tar -cvzf ${OUT_FILE} ${UPDATE_DIR}
 exit 0
