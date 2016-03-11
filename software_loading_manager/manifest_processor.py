@@ -61,6 +61,8 @@ class ManifestProcessor:
 
         self.mount_point = None
 
+        self.extract_location = None
+
         try:
             ifile = open(storage_fname, "r")
         except Exception:
@@ -110,11 +112,12 @@ class ManifestProcessor:
         #
         if self.mount_point:
             try:
-                subprocess.check_call(["/bin/umount", self.mount_point ])
+                #subprocess.check_call(["/bin/umount", self.mount_point ])
+                subprocess.check_call("rm -rf {}".format(self.mount_point), shell=True)
 
             except subprocess.CalledProcessError as e:
-                logger.exception("Failed to unmount {}: {}".format(self.mount_point),
-                                                        e.returncode)
+                logger.exception("Failed to remove {}: {}".format(self.mount_point,
+                                                        e.returncode))
         self.mount_point = None
         self.current_manifest = None
 
@@ -128,17 +131,21 @@ class ManifestProcessor:
 
         # Mount the file system
         self.mount_point = "/tmp/swlm/{}".format(os.getpid())
-        logger.info("Will create mount point: {}".format(self.mount_point))
+        #logger.info("Will create mount point: {}".format(self.mount_point))
+        logger.info("Will extract tarball to {}".format(self.mount_point))
 
         try:
+            logger.info("Creating temporary directory {}".format(self.mount_point))
             os.makedirs(self.mount_point)
         except OSError as e:
             logger.exception("Failed to create {}: {}".format(self.mount_point, e))
 
         try:
-            subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
+            #subprocess.check_call(["/bin/mount", image_path, self.mount_point ])
+            logger.info("Extracting {} to {}".format(image_path, self.mount_point))
+            subprocess.check_call("tar -xf {} -C {}".format(image_path, self.mount_point), shell=True)
         except subprocess.CalledProcessError as e:
-            logger.exception("Failed to mount {} on {}: {}".format(image_path,
+            logger.exception("Failed to extract {} to {}: {}".format(image_path,
                                                         self.mount_point,
                                                         e.returncode))
             return False
@@ -157,10 +164,12 @@ class ManifestProcessor:
             self.current_manifest = None
             # Unmount file system
             try:
-                subprocess.check_call(["/bin/umount", self.mount_point ])
+                #subprocess.check_call(["/bin/umount", self.mount_point ])
+                logger.info("Removing temporary directory {}".format(self.mount_point))
+                subprocess.check_call("rm -rf {}".format(self.mount_point), shell=True)
 
             except subprocess.CalledProcessError as e:
-                logger.exception("Failed to unmount {}: {}".format(self.mount_point,
+                logger.exception("Failed to remove {}: {}".format(self.mount_point,
                                                         e.returncode))
             self.mount_point = None
             return False

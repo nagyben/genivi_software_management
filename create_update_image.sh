@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2015, Jaguar Land Rover
 #
-# Mozilla Public License, version 2.0.  The full text of the 
+# Mozilla Public License, version 2.0.  The full text of the
 # Mozilla Public License is at https://www.mozilla.org/MPL/2.0/
 #
 # Create a software update squashfs image with the given manifest file
@@ -58,7 +58,7 @@ fi
 if [ ! -r "${UPDATE_DIR}/${MANIFEST_FILE}" ]
 then
 	echo
-	echo "${UPDATE_DIR}/${MANIFEST_FILE} cannot be opened" 
+	echo "${UPDATE_DIR}/${MANIFEST_FILE} cannot be opened"
 	echo
 	usage
 fi
@@ -79,6 +79,6 @@ fi
 
 # Create baseline squashfs image
 rm -f ${OUT_FILE}
-mksquashfs  ${UPDATE_DIR} ${OUT_FILE}
-
+#mksquashfs  ${UPDATE_DIR} ${OUT_FILE}
+tar cvzf ${OUT_FILE} ${UPDATE_DIR}
 exit 0
