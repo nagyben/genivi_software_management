@@ -46,7 +46,7 @@ class PackageManager(object):
             # Simulate install
             #TODO: implement install package routine
             # I think the below will work
-            subprocess.check_output("rpm -ivh --force {}".format(image_path), shell=True)
+            subprocess.check_output("rpm -ivh --force --nodeps {}".format(image_path), shell=True)
             subprocess.check_output("sync", shell=True)
 
             logger.info("Intalling package: {} (5 sec)".format(image_path))

@@ -198,13 +198,18 @@ try:
     logger.info("Initializing SOTA Client")
     SC = SOTAClient(image_file, signature)
 
-    try:
-        logger.info("Remounting / as rw...")
-        subprocess.check_output("mount -o remount,rw /", shell=True)
-    except subprocess.CalledProcessError as e:
-        logger.exception("Error mounting / as rw: {}".format(e.output))
-        logger.error("Root filesystem could not be mounted as rw - exiting")
-        sys.exit()
+    mounts = ["/",
+              "/var",
+              "/var/psa"]
+
+    for mount in mounts:
+        try:
+            logger.info("Remounting {} as rw...".format(mount))
+            subprocess.check_output("mount -o remount,rw {}".format(mount), shell=True)
+        except subprocess.CalledProcessError as e:
+            logger.exception("Error mounting {} as rw: {}".format(mount, e.output))
+            logger.error("Filesystem could not be mounted as rw - exiting")
+            sys.exit()
 
     thread = Thread(target = threaded_start)
     thread.start()
@@ -219,8 +224,6 @@ try:
     swlm_rpyc.root.exposed_update_available(update_id, description, signature, request_confirmation)
 
     thread.join()
-
-
 
 except KeyboardInterrupt:
     logger.info('Interrupted')
