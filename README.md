@@ -129,11 +129,17 @@ Copy the `rpyc` directory and its contents to `/usr/local/lib/python2.7/dist-pac
 In a terminal (through serial communications or SSH), as root, run `./start_rpyc_imc.sh`. **You must run this as root**.
 
 This spawns the following Python processes:
+
 1. `package_manager/package_manager.py`
+
 2. `partition_manager/partition_manager.py`
+
 3. `module_loader_ecu1/module_loader_ecu1.py`
+
 4. `software_loading_manager/software_loading_manager.py`
+
 5. `lifecycle_manager/lifecycle_manager.py`
+
 6. `hmi/hmi.py`
 
 These processes listen on localhost ports which are defined in `common/swm.py`. This is how RPyC carries out interprocess communication.
