@@ -117,6 +117,9 @@ LocMedMgr | Local Media Manager
 
 
 # RUNNING THE EXAMPLE ON NGI 1.0
+
+This example assumes the user has access to a rig or a vehicle and knows how to start an SSH session with the IMC.
+
 ## Install python and rpyc
 Make sure Python 2.7 is installed. **The Software Manager does not work with Python 3.x**
 
@@ -136,7 +139,10 @@ This spawns the following Python processes:
 These processes listen on localhost ports which are defined in `common/swm.py`. This is how RPyC carries out interprocess communication.
 
 ## Launch SOTA Client
-In a separate terminal, as root, run `/.start_sota_client.sh`. This will
+In a separate terminal, as root, run `/.start_sota_client.sh`. This will count down for 5 seconds and begin the software-over-the-air demo update. When the operation is complete, the terminal window will display a summary.
+
+## Inspect the log files
+The log files are named after each SWLM component and are collected in the `logs/` folder contained in the same directory as the `start_sota_client.sh` script.
 
 ## Troubleshooting
 ### Error 98 address already in use
