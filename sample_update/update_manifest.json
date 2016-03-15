@@ -11,7 +11,7 @@
 			"hmi_message": "Installing new package",
 			"time_estimate": 5000,
 			"operation": "install_package",
-			"image": "packages/nano-2.5.3-1.mga6.i586.rpm",
+			"image": "packages/nano-2.2.6-1.i386.rpm",
 			"on_failure": "abort"
 		}
   ]

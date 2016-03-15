@@ -15,7 +15,7 @@ The components are outlined in the image below
 The components are as follows:
 
 See the GENIVI SWLM specification for details on use cases, features, etc.
-	
+
 # ACRONYMS
 
 Acronym   | Description
@@ -110,12 +110,41 @@ LocMedMgr | Local Media Manager
     The ```parallel``` JSON element inside the manifest file needs to
     be implemented by ```manifest_processor.py```. See chapter 5.3.8 and
 	the ```operations[].parallel``` entry in Table 9.
-    
+
 12. **Integrate systemd emulator**<br>
     The current ```lifecycle_manager.py``` needs to be renamed to ```systemd_emulator.py```
     and implement the appropriate ```StartUnit()``` and ```StopUnit``` callas.
-    
 
+
+# RUNNING THE EXAMPLE ON NGI 1.0
+## Install python and rpyc
+Make sure Python 2.7 is installed. **The Software Manager does not work with Python 3.x**
+
+Copy the `rpyc` directory and its contents to `/usr/local/lib/python2.7/dist-packages/rpyc`. Create the folders if necessary.
+
+## Launch SWLM components
+In a terminal (through serial communications or SSH), as root, run `./start_rpyc_imc.sh`. **You must run this as root**.
+
+This spawns the following Python processes:
+1. `package_manager/package_manager.py`
+2. `partition_manager/partition_manager.py`
+3. `module_loader_ecu1/module_loader_ecu1.py`
+4. `software_loading_manager/software_loading_manager.py`
+5. `lifecycle_manager/lifecycle_manager.py`
+6. `hmi/hmi.py`
+
+These processes listen on localhost ports which are defined in `common/swm.py`. This is how RPyC carries out interprocess communication.
+
+## Launch SOTA Client
+In a separate terminal, as root, run `/.start_sota_client.sh`. This will
+
+## Troubleshooting
+### Error 98 address already in use
+This error happens if SWLM components are already running. If the processes did not end properly, run
+
+`ps aux | grep python`
+
+Manually `kill -9 <PID>` where `<PID>` is the process ID(s) from the previous command.
 
 # RUNNING THE CODE ON UBUNTU 14.10 AND 15.10
 
@@ -131,7 +160,7 @@ Install the necessary python libraries
 ## Launch SWM components
 In a terminal window, run a fully automated demo using:
 
-    sudo sh start_swm.sh -r 
+    sudo sh start_swm.sh -r
 
 ```sudo``` is needed since the sample_update.upd file is a squashfs image that needs to be mounted.
 
@@ -378,6 +407,3 @@ ML has the following features
 3. **Reboot system**<br>
    SWLM will send a reboot command, which will simulate
    system reboot.
-
-
-
